@@ -744,23 +744,23 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 value=dataframe['P3.Sign.C1CertificateIssueDate']
             )
             # current country of residency period: Datetime -> int days
-            dataframe = self.aggregate_datetime(
-                col_base_name='P1.PD.CurrCOR.Row2',
-                type=DocTypes.canada,
-                new_col_name='Period',
-                reference_date=None,
-                current_date=None
-            )
+            # dataframe = self.aggregate_datetime(
+            #     col_base_name='P1.PD.CurrCOR.Row2',
+            #     type=DocTypes.canada,
+            #     new_col_name='Period',
+            #     reference_date=None,
+            #     current_date=None
+            # )
             # date of birth in year: datetime -> int days
-            dataframe = self.aggregate_datetime(
-                col_base_name='P1.PD.DOBYear',
-                type=DocTypes.canada, new_col_name='Period',
-                reference_date=dataframe['P1.PD.DOBYear'],
-                current_date=dataframe['P3.Sign.C1CertificateIssueDate'],
-                one_sided='right'
-            )
+            # dataframe = self.aggregate_datetime(
+            #     col_base_name='P1.PD.DOBYear',
+            #     type=DocTypes.canada, new_col_name='Period',
+            #     reference_date=dataframe['P1.PD.DOBYear'],
+            #     current_date=dataframe['P3.Sign.C1CertificateIssueDate'],
+            #     one_sided='right'
+            # )
             # delete tnx to P1.PD.CurrCOR.Row2
-            self.column_dropper(string='P1.PD.CORDates', inplace=True)
+            # self.column_dropper(string='P1.PD.CORDates', inplace=True)
             # has previous country of residency: bool -> categorical
             dataframe['P1.PD.PCRIndicator'] = dataframe['P1.PD.PCRIndicator'].apply(
                 lambda x: True if x == 'Y' else False)
@@ -797,14 +797,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                     dtype=parser.parse, if_nan='fill',
                     value=dataframe['P3.Sign.C1CertificateIssueDate']
                 )
-                dataframe = self.aggregate_datetime(
-                    col_base_name='P1.PD.PrevCOR.Row'+str(i),
-                    type=DocTypes.canada, new_col_name='Period',
-                    reference_date=None,
-                    current_date=None
-                )
+                # dataframe = self.aggregate_datetime(
+                #     col_base_name='P1.PD.PrevCOR.Row'+str(i),
+                #     type=DocTypes.canada, new_col_name='Period',
+                #     reference_date=None,
+                #     current_date=None
+                # )
             # delete tnx to P1.PD.PrevCOR.Row2 and P1.PD.PrevCOR.Row3
-            self.column_dropper(string='P1.PD.PCRDatesR', inplace=True)
+            # self.column_dropper(string='P1.PD.PCRDatesR', inplace=True)
 
             # apply from country of residency (cwa=country where apply): Y=True, N=False
             dataframe['P1.PD.SameAsCORIndicator'] = dataframe['P1.PD.SameAsCORIndicator'].apply(
@@ -844,15 +844,15 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 value=dataframe['P3.Sign.C1CertificateIssueDate']
             )
             # TODO: if None (here .Period=0): fill with average statistically
-            dataframe = self.aggregate_datetime(
-                col_base_name='P1.PD.CWA.Row2',
-                type=DocTypes.canada,
-                new_col_name='Period',
-                reference_date=None,
-                current_date=None
-            )
+            # dataframe = self.aggregate_datetime(
+            #     col_base_name='P1.PD.CWA.Row2',
+            #     type=DocTypes.canada,
+            #     new_col_name='Period',
+            #     reference_date=None,
+            #     current_date=None
+            # )
             # delete tnx to P1.PD.CWA.Row2
-            self.column_dropper(string='P1.PD.CWADates', inplace=True)
+            # self.column_dropper(string='P1.PD.CWADates', inplace=True)
             # marriage period: datetime -> int days
             dataframe = self.change_dtype(
                 col_name='P1.MS.SecA.DateOfMarr',
@@ -860,15 +860,15 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 if_nan='fill',
                 value=dataframe['P3.Sign.C1CertificateIssueDate']
             )
-            dataframe = self.aggregate_datetime(
-                col_base_name='P1.MS.SecA.DateOfMarr',
-                type=DocTypes.canada, new_col_name='Period',
-                reference_date=None,
-                current_date=dataframe['P3.Sign.C1CertificateIssueDate'],
-                one_sided='right'
-            )
+            # dataframe = self.aggregate_datetime(
+            #     col_base_name='P1.MS.SecA.DateOfMarr',
+            #     type=DocTypes.canada, new_col_name='Period',
+            #     reference_date=None,
+            #     current_date=dataframe['P3.Sign.C1CertificateIssueDate'],
+            #     one_sided='right'
+            # )
             # delete tnx to P1.MS.SecA.DateOfMarr
-            self.column_dropper(string='P1.MS.SecA.MarrDate.From')
+            # self.column_dropper(string='P1.MS.SecA.MarrDate.From')
             # previous marriage: Y=True, N=False
             dataframe['P2.MS.SecA.PrevMarrIndicator'] = dataframe['P2.MS.SecA.PrevMarrIndicator'].apply(
                 lambda x: True if x == 'Y' else False)
@@ -886,14 +886,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 if_nan='fill',
                 value=dataframe['P3.Sign.C1CertificateIssueDate']
             )
-            dataframe = self.aggregate_datetime(
-                col_base_name='P2.MS.SecA.PrevSpouseDOB.DOBYear',
-                type=DocTypes.canada,
-                new_col_name='Period',
-                reference_date=None,
-                one_sided='right',
-                current_date=dataframe['P3.Sign.C1CertificateIssueDate']
-            )
+            # dataframe = self.aggregate_datetime(
+            #     col_base_name='P2.MS.SecA.PrevSpouseDOB.DOBYear',
+            #     type=DocTypes.canada,
+            #     new_col_name='Period',
+            #     reference_date=None,
+            #     one_sided='right',
+            #     current_date=dataframe['P3.Sign.C1CertificateIssueDate']
+            # )
             # previous marriage period: string -> datetime -> int days
             dataframe = self.change_dtype(
                 col_name='P2.MS.SecA.FromDate',
@@ -907,14 +907,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 if_nan='fill',
                 value=dataframe['P3.Sign.C1CertificateIssueDate']
             )
-            dataframe = self.aggregate_datetime(
-                col_base_name='P2.MS.SecA',
-                type=DocTypes.canada,
-                new_col_name='Period',
-                reference_date=None,
-                current_date=None
-            )
-            self.column_dropper(string='P2.MS.SecA.Prevly', inplace=True)
+            # dataframe = self.aggregate_datetime(
+            #     col_base_name='P2.MS.SecA',
+            #     type=DocTypes.canada,
+            #     new_col_name='Period',
+            #     reference_date=None,
+            #     current_date=None
+            # )
+            # self.column_dropper(string='P2.MS.SecA.Prevly', inplace=True)
             # passport country of issue: string -> categorical
             dataframe = self.change_dtype(
                 col_name='P2.MS.SecA.Psprt.CountryofIssue.CountryofIssue',
@@ -932,14 +932,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 if_nan='fill',
                 value=temp_date
             )
-            dataframe = self.aggregate_datetime(
-                col_base_name='P2.MS.SecA.Psprt.ExpiryDate',
-                type=DocTypes.canada,
-                new_col_name='Remaining',
-                current_date=None,
-                one_sided='left',
-                reference_date=dataframe['P3.Sign.C1CertificateIssueDate']
-            )
+            # dataframe = self.aggregate_datetime(
+            #     col_base_name='P2.MS.SecA.Psprt.ExpiryDate',
+            #     type=DocTypes.canada,
+            #     new_col_name='Remaining',
+            #     current_date=None,
+            #     one_sided='left',
+            #     reference_date=dataframe['P3.Sign.C1CertificateIssueDate']
+            # )
             # native lang: string -> categorical
             dataframe = self.change_dtype(
                 col_name='P2.MS.SecA.Langs.languages.nativeLang.nativeLang',
@@ -971,11 +971,11 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
             dataframe['P2.USCard.q1.usCardIndicator'] = dataframe['P2.USCard.q1.usCardIndicator'].apply(
                 lambda x: True if x == 'Y' else False)
             # drop contact information except having US Canada phone number
-            self.column_dropper(
-                string='P2.CI.cntct',
-                exclude='CanadaUS',
-                inplace=True
-            )
+            # self.column_dropper(
+            #     string='P2.CI.cntct',
+            #     exclude='CanadaUS',
+            #     inplace=True
+            # )
             # US Canada phone number: bool -> binary
             dataframe['P2.CI.cntct.PhnNums.Phn.CanadaUS'] = dataframe['P2.CI.cntct.PhnNums.Phn.CanadaUS'].apply(
                 lambda x: True if x == '1' else False)
@@ -1010,19 +1010,19 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 value=dataframe['P3.Sign.C1CertificateIssueDate']
             )
             # how long going to stay: datetime -> int days
-            dataframe = self.aggregate_datetime(
-                col_base_name='P3.DOV.PrpsRow1.HLS',
-                type=DocTypes.canada,
-                new_col_name='Period',
-                reference_date=None,
-                current_date=None
-            )
+            # dataframe = self.aggregate_datetime(
+            #     col_base_name='P3.DOV.PrpsRow1.HLS',
+            #     type=DocTypes.canada,
+            #     new_col_name='Period',
+            #     reference_date=None,
+            #     current_date=None
+            # )
             # delete tnx to P3.DOV.PrpsRow1.HLS
-            self.column_dropper(
-                string='P3.DOV.PrpsRow1.HLS',
-                exclude='Period',
-                inplace=True
-            )
+            # self.column_dropper(
+            #     string='P3.DOV.PrpsRow1.HLS',
+            #     exclude='Period',
+            #     inplace=True
+            # )
             # fund to integer
             dataframe = self.change_dtype(
                 col_name='P3.DOV.PrpsRow1.Funds.Funds',
@@ -1059,13 +1059,13 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 if_nan='fill',
                 value=dataframe['P3.Sign.C1CertificateIssueDate']
             )
-            dataframe = self.aggregate_datetime(
-                col_base_name='P3.Edu.Edu_Row1',
-                type=DocTypes.canada,
-                new_col_name='Period',
-                reference_date=None,
-                current_date=None
-            )
+            # dataframe = self.aggregate_datetime(
+            #     col_base_name='P3.Edu.Edu_Row1',
+            #     type=DocTypes.canada,
+            #     new_col_name='Period',
+            #     reference_date=None,
+            #     current_date=None
+            # )
             # higher education country: string -> categorical
             # TODO: skip here, and only fill with 'IRAN' for those who have 'P3.Edu.EduIndicator' = True
             #   see ### P3.Edu.Edu_Row1.Country.Country -> categorical in notebooks for more info
@@ -1081,7 +1081,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
             # clean occupation features
             occupation_tag_list = [
                 c for c in dataframe.columns.values if 'P3.Occ.OccRow' in c]
-            PREV_OCCUPATION_MAX_FEATURES = 4
+            PREV_OCCUPATION_MAX_FEATURES = 9
             for i in range(len(occupation_tag_list) // PREV_OCCUPATION_MAX_FEATURES):
                 i += 1  # in the form, it starts from Row1 (ie. i+1)
                 # occupation period 01: none -> string year -> int days
@@ -1097,13 +1097,13 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                     if_nan='fill',
                     value=dataframe['P3.Sign.C1CertificateIssueDate']
                 )
-                dataframe = self.aggregate_datetime(
-                    col_base_name='P3.Occ.OccRow'+str(i),
-                    type=DocTypes.canada,
-                    new_col_name='Period',
-                    reference_date=None,
-                    current_date=None
-                )
+                # dataframe = self.aggregate_datetime(
+                #     col_base_name='P3.Occ.OccRow'+str(i),
+                #     type=DocTypes.canada,
+                #     new_col_name='Period',
+                #     reference_date=None,
+                #     current_date=None
+                # )
                 # occupation type 01: string -> categorical
                 dataframe = self.change_dtype(
                     col_name='P3.Occ.OccRow'+str(i)+'.Occ.Occ',
@@ -1155,10 +1155,10 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
             dataframe['P3.PWrapper.witnessIllTreat'] = dataframe['P3.PWrapper.witnessIllTreat'].apply(
                 lambda x: True if x == 'Y' else False)
             # drop the time form was filled
-            self.column_dropper(
-                string='P3.Sign.C1CertificateIssueDate',
-                inplace=True
-            )
+            # self.column_dropper(
+            #     string='P3.Sign.C1CertificateIssueDate',
+            #     inplace=True
+            # )
 
             return dataframe
 
@@ -1205,7 +1205,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                     value=np.int16('0')
                 )
             # drop all names
-            self.column_dropper(string='Name', inplace=True)
+            # self.column_dropper(string='Name', inplace=True)
             # drop all Accompany=No and only rely on Accompany=Yes using binary state
             self.column_dropper(string='No', inplace=True)
             # applicant marriage status: string to integer
@@ -1230,14 +1230,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 value=dataframe['p1.SecC.SecCdate']
             )
             # spouse age period: datetime -> int days
-            dataframe = self.aggregate_datetime(
-                col_base_name='p1.SecA.Sps.SpsDOB',
-                type=DocTypes.canada,
-                new_col_name='Period',
-                reference_date=None,
-                current_date=dataframe['p1.SecC.SecCdate'],
-                one_sided='right'
-            )
+            # dataframe = self.aggregate_datetime(
+            #     col_base_name='p1.SecA.Sps.SpsDOB',
+            #     type=DocTypes.canada,
+            #     new_col_name='Period',
+            #     reference_date=None,
+            #     current_date=dataframe['p1.SecC.SecCdate'],
+            #     one_sided='right'
+            # )
             # spouse country of birth: string -> categorical
             dataframe = self.change_dtype(
                 col_name='p1.SecA.Sps.SpsCOB',
@@ -1262,15 +1262,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 value=dataframe['p1.SecC.SecCdate']
             )
             # mother age period: datetime -> int days
-            # TODO: if =0 (originally None), fill with average age difference of parents and children
-            dataframe = self.aggregate_datetime(
-                col_base_name='p1.SecA.Mo.MoDOB',
-                type=DocTypes.canada,
-                new_col_name='Period',
-                reference_date=None,
-                current_date=dataframe['p1.SecC.SecCdate'],
-                one_sided='right'
-            )
+            # dataframe = self.aggregate_datetime(
+            #     col_base_name='p1.SecA.Mo.MoDOB',
+            #     type=DocTypes.canada,
+            #     new_col_name='Period',
+            #     reference_date=None,
+            #     current_date=dataframe['p1.SecC.SecCdate'],
+            #     one_sided='right'
+            # )
             # mother occupation type (issue #2): string -> categorical
             dataframe = self.change_dtype(
                 col_name='p1.SecA.Mo.MoOcc',
@@ -1296,15 +1295,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 value=dataframe['p1.SecC.SecCdate']
             )
             # father age period: datetime -> int days
-            # TODO: if =0 (originally None), fill with average age difference of parents and children
-            dataframe = self.aggregate_datetime(
-                col_base_name='p1.SecA.Fa.FaDOB',
-                type=DocTypes.canada,
-                new_col_name='Period',
-                reference_date=None,
-                current_date=dataframe['p1.SecC.SecCdate'],
-                one_sided='right'
-            )
+            # dataframe = self.aggregate_datetime(
+            #     col_base_name='p1.SecA.Fa.FaDOB',
+            #     type=DocTypes.canada,
+            #     new_col_name='Period',
+            #     reference_date=None,
+            #     current_date=dataframe['p1.SecC.SecCdate'],
+            #     one_sided='right'
+            # )
             # mother occupation type (issue #2): string -> categorical
             dataframe = self.change_dtype(
                 col_name='p1.SecA.Fa.FaOcc',
@@ -1349,15 +1347,15 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                     if_nan='skip'
                 )
                 # child's age period 01: datetime -> int days
-                dataframe = self.aggregate_datetime(
-                    type=DocTypes.canada,
-                    col_base_name='p1.SecB.Chd.['+str(i)+'].ChdDOB',
-                    new_col_name='Period',
-                    reference_date=None,
-                    one_sided='right',
-                    current_date=dataframe['p1.SecC.SecCdate'],
-                    if_nan='skip'
-                )
+                # dataframe = self.aggregate_datetime(
+                #     type=DocTypes.canada,
+                #     col_base_name='p1.SecB.Chd.['+str(i)+'].ChdDOB',
+                #     new_col_name='Period',
+                #     reference_date=None,
+                #     one_sided='right',
+                #     current_date=dataframe['p1.SecC.SecCdate'],
+                #     if_nan='skip'
+                # )
                 # child's country of birth 01: string -> categorical
                 dataframe = self.change_dtype(
                     col_name='p1.SecB.Chd.['+str(i)+'].ChdCOB',
@@ -1396,40 +1394,40 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                         value=dataframe['p1.SecC.SecCdate']
                     )
                     # ghost child's age period: datetime (current date) -> int 0 days
-                    dataframe = self.aggregate_datetime(
-                        type=DocTypes.canada,
-                        col_base_name='p1.SecB.Chd.['+str(i)+'].ChdDOB',
-                        new_col_name='Period',
-                        reference_date=None,
-                        one_sided='right',
-                        current_date=dataframe['p1.SecC.SecCdate'],
-                        if_nan=None
-                    )
+                    # dataframe = self.aggregate_datetime(
+                    #     type=DocTypes.canada,
+                    #     col_base_name='p1.SecB.Chd.['+str(i)+'].ChdDOB',
+                    #     new_col_name='Period',
+                    #     reference_date=None,
+                    #     one_sided='right',
+                    #     current_date=dataframe['p1.SecC.SecCdate'],
+                    #     if_nan=None
+                    # )
 
-            # fill existing child's date of birth where it is None with a heuristic
-            # take average age period of children
-            col_names = []  # holds all age periods
-            col_names_age_all = []  # holds all age periods and date of births
-            for i in range(len(children_tag_list) // CHILDREN_MAX_FEATURES):
-                col_name = 'p1.SecB.Chd.['+str(i)+'].ChdDOB.Period'
-                if col_name in dataframe.columns.values:
-                    col_names.append(col_name)
-                col_name = 'p1.SecB.Chd.['+str(i)+'].ChdDOB'
-                if col_name in dataframe.columns.values:
-                    col_names_age_all.append(col_name)
-            # extract `Chd.DOB` from `Chd.DOB.Period`
-            col_names_unprocessed = list(
-                set(col_names_age_all) - set(col_names))
-            for c in col_names_unprocessed:  # drop columns after processing them
-                # average of family children as the heuristic
-                dataframe[c+'.Period'] = dataframe[dataframe[col_names]
-                                                   != 0].mean(axis=1, numeric_only=True)
-                dataframe.drop(c, axis=1, inplace=True)
+            # # fill existing child's date of birth where it is None with a heuristic
+            # # take average age period of children
+            # col_names = []  # holds all age periods
+            # col_names_age_all = []  # holds all age periods and date of births
+            # for i in range(len(children_tag_list) // CHILDREN_MAX_FEATURES):
+            #     col_name = 'p1.SecB.Chd.['+str(i)+'].ChdDOB.Period'
+            #     if col_name in dataframe.columns.values:
+            #         col_names.append(col_name)
+            #     col_name = 'p1.SecB.Chd.['+str(i)+'].ChdDOB'
+            #     if col_name in dataframe.columns.values:
+            #         col_names_age_all.append(col_name)
+            # # extract `Chd.DOB` from `Chd.DOB.Period`
+            # col_names_unprocessed = list(
+            #     set(col_names_age_all) - set(col_names))
+            # for c in col_names_unprocessed:  # drop columns after processing them
+            #     # average of family children as the heuristic
+            #     dataframe[c+'.Period'] = dataframe[dataframe[col_names]
+            #                                        != 0].mean(axis=1, numeric_only=True)
+            #     dataframe.drop(c, axis=1, inplace=True)
 
             # siblings' status
             siblings_tag_list = [
                 c for c in dataframe.columns.values if 'p1.SecC.Chd' in c]
-            SIBLINGS_MAX_FEATURES = 7
+            SIBLINGS_MAX_FEATURES = 8
             for i in range(len(siblings_tag_list) // SIBLINGS_MAX_FEATURES):
                 # sibling's marriage status 01: string to integer
                 dataframe = self.change_dtype(
@@ -1452,15 +1450,15 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                     if_nan='skip'
                 )
                 # sibling's age period 01: datetime -> int days
-                dataframe = self.aggregate_datetime(
-                    type=DocTypes.canada,
-                    col_base_name='p1.SecC.Chd.['+str(i)+'].ChdDOB',
-                    new_col_name='Period',
-                    reference_date=None,
-                    one_sided='right',
-                    current_date=dataframe['p1.SecC.SecCdate'],
-                    if_nan='skip'
-                )
+                # dataframe = self.aggregate_datetime(
+                #     type=DocTypes.canada,
+                #     col_base_name='p1.SecC.Chd.['+str(i)+'].ChdDOB',
+                #     new_col_name='Period',
+                #     reference_date=None,
+                #     one_sided='right',
+                #     current_date=dataframe['p1.SecC.SecCdate'],
+                #     if_nan='skip'
+                # )
                 # sibling's country of birth 01: string -> categorical
                 dataframe = self.change_dtype(
                     col_name='p1.SecC.Chd.['+str(i)+'].ChdCOB',
@@ -1492,38 +1490,38 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                         value=dataframe['p1.SecC.SecCdate']
                     )
                     # ghost sibling's age period: datetime (current date) -> int 0 days
-                    dataframe = self.aggregate_datetime(
-                        type=DocTypes.canada,
-                        col_base_name='p1.SecC.Chd.['+str(i)+'].ChdDOB',
-                        new_col_name='Period',
-                        reference_date=None,
-                        one_sided='right',
-                        current_date=dataframe['p1.SecC.SecCdate'],
-                        if_nan=None
-                    )
+                    # dataframe = self.aggregate_datetime(
+                    #     type=DocTypes.canada,
+                    #     col_base_name='p1.SecC.Chd.['+str(i)+'].ChdDOB',
+                    #     new_col_name='Period',
+                    #     reference_date=None,
+                    #     one_sided='right',
+                    #     current_date=dataframe['p1.SecC.SecCdate'],
+                    #     if_nan=None
+                    # )
 
-            # fill existing sibling's date of birth where it is None with a heuristic
-            # take average age period of siblings
-            col_names = []  # holds all age periods
-            col_names_age_all = []  # holds all age periods and date of births
-            for i in range(len(siblings_tag_list) // SIBLINGS_MAX_FEATURES):
-                col_name = 'p1.SecC.Chd.['+str(i)+'].ChdDOB.Period'
-                if col_name in dataframe.columns.values:
-                    col_names.append(col_name)
-                col_name = 'p1.SecC.Chd.['+str(i)+'].ChdDOB'
-                if col_name in dataframe.columns.values:
-                    col_names_age_all.append(col_name)
-            # extract `Chd.DOB` from `Chd.DOB.Period`
-            col_names_unprocessed = list(
-                set(col_names_age_all) - set(col_names))
-            for c in col_names_unprocessed:  # drop columns after processing them
-                # average of family siblings as the heuristic
-                dataframe[c+'.Period'] = dataframe[dataframe[col_names]
-                                                   != 0].mean(axis=1, numeric_only=True)
-                dataframe.drop(c, axis=1, inplace=True)
+            # # fill existing sibling's date of birth where it is None with a heuristic
+            # # take average age period of siblings
+            # col_names = []  # holds all age periods
+            # col_names_age_all = []  # holds all age periods and date of births
+            # for i in range(len(siblings_tag_list) // SIBLINGS_MAX_FEATURES):
+            #     col_name = 'p1.SecC.Chd.['+str(i)+'].ChdDOB.Period'
+            #     if col_name in dataframe.columns.values:
+            #         col_names.append(col_name)
+            #     col_name = 'p1.SecC.Chd.['+str(i)+'].ChdDOB'
+            #     if col_name in dataframe.columns.values:
+            #         col_names_age_all.append(col_name)
+            # # extract `Chd.DOB` from `Chd.DOB.Period`
+            # col_names_unprocessed = list(
+            #     set(col_names_age_all) - set(col_names))
+            # for c in col_names_unprocessed:  # drop columns after processing them
+            #     # average of family siblings as the heuristic
+            #     dataframe[c+'.Period'] = dataframe[dataframe[col_names]
+            #                                        != 0].mean(axis=1, numeric_only=True)
+            #     dataframe.drop(c, axis=1, inplace=True)
 
-            # drop the time form was filled
-            self.column_dropper(string='p1.SecC.SecCdate', inplace=True)
+            # # drop the time form was filled
+            # self.column_dropper(string='p1.SecC.SecCdate', inplace=True)
 
             return dataframe
 
