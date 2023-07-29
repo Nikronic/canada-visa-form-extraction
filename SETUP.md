@@ -45,7 +45,9 @@ These libraries (the main one is FastAPI) are not for the ML part and only are h
 
 >1. `pip install pydantic>=1.9.1`
 >2. `pip install fastapi>=0.85.0`
->3. `pip install uvicorn>=0.18.2`
+>3. `pip install gunicorn>=20.1.0`
+>4. `pip install uvicorn>=0.18.2`
+>5. `pip install python-multipart>=0.0.5`
 
 ----
 
