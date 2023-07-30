@@ -4,4 +4,10 @@
 
 ## Installation
 
-For the installation process, please consult [SETUP.md](SETUP.md).
+### Package
+
+`pip install git+https://github.com/Nikronic/canada-visa-form-extraction.git`
+
+### Manual Installation
+
+For the *manual* installation process, please consult [SETUP.md](SETUP.md).
