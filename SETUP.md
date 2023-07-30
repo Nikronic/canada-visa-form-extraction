@@ -54,12 +54,10 @@ These libraries (the main one is FastAPI) are not for the ML part and only are h
 1. `pip install pydantic-settings`
 2. `pip install pyngrok`
 
-For using `ngrok`:
+For using `ngrok`, start `uvicorn` server with your own args:
+>`USE_NGROK=True python api.py --bind host --port port`
 
-1. Start `uvicorn` server with your own args: `USE_NGROK=True python api.py --bind host --port port`
-2. Run `ngrok` (assuming you have added your authkey): `ngrok http port`
-
-Note that you can use `0.0.0.0` for the `host` to listen on all interfaces. By default we use `host=0.0.0.0` and `port=8000`.
+Note that `USE_NGROK=True` has been handled by the code and you can use this flag to use `ngrok` (online) or not (offline). Also, you can use `0.0.0.0` for the `host` to listen on all interfaces. By default we use `host=0.0.0.0` and `port=8000`.
 
 ----
 
