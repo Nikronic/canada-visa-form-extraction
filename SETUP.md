@@ -76,4 +76,7 @@ We have provided a `yml` file (`conda_env.yml`) for ease of install using `conda
 We have provided a `Dockerfile` for ease of install using `docker`. Please use:
 > `docker build -t cvfe .`
 
+For running it, you need to map the port `8000` of the container to your desired port (`8001`) on host:
+> `docker run -p 8001:8000 cvfe`
+
 *remark*: note that we do not use `mamba` in `Dockerfile` as the complexity of the environment is small and the overhead of installing `mamba` itself might not worth it. Nonetheless, *we never tested* this hypothesis and *appreciate your feedback*.
