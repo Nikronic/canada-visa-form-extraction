@@ -8,6 +8,8 @@
 
 `pip install git+https://github.com/Nikronic/canada-visa-form-extraction.git`
 
+Or if you have cloned/downloaded the repository, just use `pip install .`
+
 ### Manual Installation
 
 For the *manual* installation process, please consult [SETUP.md](SETUP.md).
