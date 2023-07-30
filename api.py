@@ -12,11 +12,13 @@ from cvfe.data.constant import DocTypes
 # Ours: API
 from cvfe.api import models as api_models
 from cvfe.api import apps as api_apps
+from pydantic_settings import BaseSettings
 # API
 import fastapi
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 # helpers
+from typing import ClassVar
 from pathlib import Path
 import argparse
 import logging
@@ -66,8 +68,13 @@ BASE_SOURCE_DIR: Path = Path('temp/encrypted/')
 logger = logging.getLogger(__name__)
 logger.setLevel(VERBOSE)
 
+class Settings(BaseSettings):
+    BASE_URL: ClassVar[str] = f'http://{args.bind}:{args.port}'
+    USE_NGROK: ClassVar[bool] = os.environ.get('USE_NGROK', 'False') == 'True'
+
 # instantiate fast api app
 app = fastapi.FastAPI()
+settings = Settings()
 
 # fastapi cross origin
 origins = ['*']
@@ -79,6 +86,18 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+if settings.USE_NGROK:
+    # pyngrok should only ever be installed or initialized in a dev environment when this flag is set
+    from pyngrok import ngrok
+
+    # Open a ngrok tunnel to the dev server
+    public_url = ngrok.connect(args.port).public_url
+    logger.info(f'ngrok tunnel \"{public_url}\" -> \"http://{args.bind}:{args.port}\"')
+
+    # Update any base URLs or webhooks to use the public ngrok URL
+    Settings.BASE_URL = public_url
+    api_apps.init_webhooks(public_url)
 
 
 def _process(src_dir: Path):
