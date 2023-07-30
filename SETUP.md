@@ -45,7 +45,19 @@ These libraries (the main one is FastAPI) are not for the ML part and only are h
 
 >1. `pip install pydantic>=1.9.1`
 >2. `pip install fastapi>=0.85.0`
->3. `pip install uvicorn>=0.18.2`
+>3. `pip install gunicorn>=20.1.0`
+>4. `pip install uvicorn>=0.18.2`
+>5. `pip install python-multipart>=0.0.5`
+
+*\[Optional\]* For making it online using `ngrok`:
+
+1. `pip install pydantic-settings`
+2. `pip install pyngrok`
+
+For using `ngrok`, start `uvicorn` server with your own args:
+>`USE_NGROK=True python api.py --bind host --port port`
+
+Note that `USE_NGROK=True` has been handled by the code and you can use this flag to use `ngrok` (online) or not (offline). Also, you can use `0.0.0.0` for the `host` to listen on all interfaces. By default we use `host=0.0.0.0` and `port=8000`.
 
 ----
 

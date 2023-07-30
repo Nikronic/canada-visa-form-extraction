@@ -33,3 +33,8 @@ class StandaloneApplication(BaseApplication):
 
     def load(self):
         return self.application
+
+
+def init_webhooks(base_url):
+    # Update inbound traffic via APIs to use the public-facing ngrok URL
+    pass
