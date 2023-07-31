@@ -163,7 +163,6 @@ def _process(src_dir: Path):
 @app.post(
     '/cvfe/v1/convert/adobe-xfa/',
     status_code=fastapi.status.HTTP_200_OK)
-    # response_model=api_models.ConvertedXFAContentResponse)
 async def process(
     form_5257: fastapi.UploadFile,
     form_5645: fastapi.UploadFile):
@@ -209,4 +208,5 @@ if __name__ == '__main__':
         app=app,
         host=args.bind,
         port=args.port,
+        workers=args.workers,
     )
