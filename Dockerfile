@@ -19,16 +19,17 @@ WORKDIR /app
 # install Pipenv
 RUN pip install --upgrade pip
 
-# Copy pyproject.toml, setup.cfg, and the entire package
-COPY ./pyproject.toml /app/pyproject.toml
-COPY ./setup.cfg /app/setup.cfg
-COPY ./cvfe /app/cvfe
+# Copy only the requirements.txt first to leverage Docker cache
+COPY ./requirements.txt /app/
 
-# install package dependencies (`cvfe` package)
-RUN pip install .
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # copy the content of the local src directory to the working directory
 COPY . /app/
+
+# install the package itself (`cvfe` package)
+RUN pip install .
 
 # run FastAPI app with Uvicorn as the main application
 CMD ["python", "api.py", "--bind", "0.0.0.0", "--port", "8000"]
