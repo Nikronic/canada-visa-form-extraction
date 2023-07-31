@@ -1,3 +1,8 @@
 from setuptools import setup
 
-setup()
+with open('VERSION', 'r') as file:
+    version = file.read().strip()
+
+setup(
+    version=version,
+)
