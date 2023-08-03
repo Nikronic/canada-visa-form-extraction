@@ -1,108 +1,39 @@
-# Core
-import pandas as pd
-# Ours: Data
+# Ours: data
 from cvfe.data import functional
 from cvfe.data.preprocessor import (
-    MakeContentCopyProtectedMachineReadable,
-    CanadaDataframePreprocessor,
+    CopyFile,
     FileTransformCompose,
-    CopyFile
-)
+    MakeContentCopyProtectedMachineReadable,
+    CanadaDataframePreprocessor)
 from cvfe.data.constant import DocTypes
 # Ours: API
-from cvfe.api import models as api_models
-from cvfe.api import apps as api_apps
-from pydantic_settings import BaseSettings
+from cvfe.api.convert import BASE_SOURCE_DIR
 # API
 import fastapi
-from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
+import requests
+from fastapi.encoders import jsonable_encoder
 # helpers
-from typing import ClassVar
 from pathlib import Path
-import argparse
+import pandas as pd
 import logging
 import sys
 import os
 
 
-# argparse
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    '-v',
-    '--verbose',
-    type=str,
-    help='logging verbosity level.',
-    choices=['debug', 'info'],
-    default='info',
-    required=False)
-parser.add_argument(
-    '-b',
-    '--bind',
-    type=str,
-    help='ip address of host',
-    default='0.0.0.0',
-    required=True)
-parser.add_argument(
-    '-p',
-    '--port',
-    type=int,
-    help='port used for creating the gunicorn server',
-    default=8000,
-    required=True)
-parser.add_argument(
-    '-w',
-    '--workers',
-    type=int,
-    help='number of works used by gunicorn',
-    default=1,
-    required=False)
-args = parser.parse_args()
-
-# globals
-VERBOSE = logging.DEBUG
-# all files will be saved here (temporary)
-BASE_SOURCE_DIR: Path = Path('temp/encrypted/')
-
-# configure logging
+# config logger
 logger = logging.getLogger(__name__)
-logger.setLevel(VERBOSE)
 
-class Settings(BaseSettings):
-    BASE_URL: ClassVar[str] = f'http://{args.bind}:{args.port}'
-    USE_NGROK: ClassVar[bool] = os.environ.get('USE_NGROK', 'False') == 'True'
 
-# instantiate fast api app
-app = fastapi.FastAPI()
-settings = Settings()
-
-# fastapi cross origin
-origins = ['*']
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=['*'],
-    allow_headers=['*'],
+# FastAPI router to be used by the FastAPI app
+router = fastapi.APIRouter(
+    prefix='/cvfe/v1/convert/adobe_xfa',
+    tags=['adobe_xfa']
 )
 
-if settings.USE_NGROK:
-    # pyngrok should only ever be installed or initialized in a dev environment when this flag is set
-    from pyngrok import ngrok
 
-    # Open a ngrok tunnel to the dev server
-    public_url = ngrok.connect(args.port).public_url
-    logger.info(f'ngrok tunnel \"{public_url}\" -> \"http://{args.bind}:{args.port}\"')
-
-    # Update any base URLs or webhooks to use the public ngrok URL
-    Settings.BASE_URL = public_url
-    api_apps.init_webhooks(public_url)
-
-
-def _process(src_dir: Path):
+def process(src_dir: Path):
     # path to the output decrypted pdf
-    dst_dir: Path = BASE_SOURCE_DIR.parts[0] / Path('decrypted/')
+    dst_dir: Path = src_dir.parts[0] / Path('decrypted/')
     # main code
     logger.info('↓↓↓ Starting data extraction ↓↓↓')
     # Canada protected PDF to make machine readable and skip other files
@@ -160,17 +91,17 @@ def _process(src_dir: Path):
     return dataframe
 
 
-@app.post(
-    '/cvfe/v1/convert/adobe-xfa/',
-    status_code=fastapi.status.HTTP_200_OK)
-async def process(
+@router.post(
+    '/',
+    status_code=fastapi.status.HTTP_200_OK,
+    tags=['adobe_xfa'])
+async def convert(
     form_5257: fastapi.UploadFile,
     form_5645: fastapi.UploadFile):
     try:
         # save files to disk
         input_path: Path = BASE_SOURCE_DIR / Path('x/')
         with open(input_path / Path('5257.pdf'), 'wb') as f:
-            # read files
             contents_form_5257 = await form_5257.read()
             f.write(contents_form_5257)
         with open(input_path / Path('5645.pdf'), 'wb') as f:
@@ -183,11 +114,21 @@ async def process(
             status_code=fastapi.status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail=str(e))
     try:
-        
-        data: pd.DataFrame = _process(BASE_SOURCE_DIR)
+        data: pd.DataFrame = process(src_dir=BASE_SOURCE_DIR)
 
         logger.info('Process finished')
-        return data.iloc[0].to_dict()
+        response = [data.iloc[0].to_dict()]
+
+        # make response jsonable
+        jsonable_response = jsonable_encoder(response)
+        # send the response to create the item in DB
+        thirdparty_response = requests.post(
+            url='https://management.visaland.org/system/api/v1/import-file',
+            json=jsonable_response
+        )
+        logger.info(f'DB response code {thirdparty_response.status_code}')
+
+        return response
     
     except Exception as error:
         logger.exception(error)
@@ -195,18 +136,3 @@ async def process(
         raise fastapi.HTTPException(
             status_code=fastapi.status.HTTP_400_BAD_REQUEST,
             detail=str(e))
-
-
-if __name__ == '__main__':
-    options = {
-        'bind': f'{args.bind}:{args.port}',
-        'workers': args.workers,
-        'worker_class': 'uvicorn.workers.UvicornWorker'
-    }
-    # api_apps.StandaloneApplication(app=app, options=options).run()
-    uvicorn.run(
-        app=app,
-        host=args.bind,
-        port=args.port,
-        workers=args.workers,
-    )

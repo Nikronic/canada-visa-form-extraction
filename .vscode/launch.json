@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "cwd": "${workspaceFolder}/",
-            "program": "${workspaceFolder}/api.py",
+            "program": "${workspaceFolder}/cvfe/main.py",
             "console": "integratedTerminal",
             "args": [
                 "--verbose", "debug",
