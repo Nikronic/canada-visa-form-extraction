@@ -13,6 +13,7 @@ import fastapi
 import requests
 from fastapi.encoders import jsonable_encoder
 # helpers
+from typing import Optional
 from pathlib import Path
 import pandas as pd
 import logging
@@ -97,7 +98,8 @@ def process(src_dir: Path):
     tags=['adobe_xfa'])
 async def convert(
     form_5257: fastapi.UploadFile,
-    form_5645: fastapi.UploadFile):
+    form_5645: fastapi.UploadFile,
+    post_url: Optional[str] = None):
     try:
         # save files to disk
         input_path: Path = BASE_SOURCE_DIR / Path('x/')
@@ -119,14 +121,16 @@ async def convert(
         logger.info('Process finished')
         response = [data.iloc[0].to_dict()]
 
-        # make response jsonable
-        jsonable_response = jsonable_encoder(response)
-        # send the response to create the item in DB
-        thirdparty_response = requests.post(
-            url='https://management.visaland.org/system/api/v1/import-file',
-            json=jsonable_response
-        )
-        logger.info(f'DB response code {thirdparty_response.status_code}')
+        # if third-party url is provided, send post request to that
+        if post_url:
+            # make response jsonable
+            jsonable_response = jsonable_encoder(response)
+            # send the response to create the item in DB
+            post_response = requests.post(
+                url=post_url,
+                json=jsonable_response
+            )
+            logger.info(f'DB response code {post_response.status_code}')
 
         return response
     
