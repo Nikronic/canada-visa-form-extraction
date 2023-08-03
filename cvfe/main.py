@@ -42,6 +42,12 @@ parser.add_argument(
     help='number of works used by gunicorn',
     default=1,
     required=False)
+parser.add_argument(
+    '-u',
+    '--post-url',
+    type=str,
+    help='URL of the third-party endpoint to send the post request',
+    required=False)
 args = parser.parse_args()
 
 # globals
