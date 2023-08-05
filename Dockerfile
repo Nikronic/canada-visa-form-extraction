@@ -30,6 +30,3 @@ COPY . /app/
 
 # install the package itself (`cvfe` package)
 RUN pip install .
-
-# run FastAPI app with Uvicorn as the main application
-CMD ["python", "-m", "cvfe.main.py", "--bind", "0.0.0.0", "--port", "8000"]
