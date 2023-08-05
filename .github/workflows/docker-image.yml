@@ -18,7 +18,7 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    - name: Set variables
+    - name: Get package version
       run: |
         VER=$(cat VERSION)
         echo "VERSION=$VER" >> $GITHUB_ENV
