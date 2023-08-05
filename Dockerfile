@@ -3,6 +3,8 @@ FROM python:3.11-slim
 
 # set the maintainer label
 LABEL maintainer="Nikan Doosti <nikan.doosti@outlook.com>"
+# connect the container image to the repository
+LABEL org.opencontainers.image.source https://github.com/nikronic/canada-visa-form-extraction
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
