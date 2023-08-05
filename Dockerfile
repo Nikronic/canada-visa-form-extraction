@@ -3,6 +3,8 @@ FROM python:3.11-slim
 
 # set the maintainer label
 LABEL maintainer="Nikan Doosti <nikan.doosti@outlook.com>"
+# connect the container image to the repository
+LABEL org.opencontainers.image.source https://github.com/nikronic/canada-visa-form-extraction
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -30,6 +32,3 @@ COPY . /app/
 
 # install the package itself (`cvfe` package)
 RUN pip install .
-
-# run FastAPI app with Uvicorn as the main application
-CMD ["python", "-m", "cvfe.main.py", "--bind", "0.0.0.0", "--port", "8000"]

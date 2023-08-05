@@ -19,6 +19,21 @@ We have provided a `yml` file (`conda_env.yml`) for ease of install using `conda
 
 #### 1.1.3 Using Docker
 
+**Official Image**:
+The easiest way is to just pull the official image from GitHub Container Registry:
+> `docker pull ghcr.io/nikronic/cvfe:DESIRED_VERSION`
+
+For instance, for the version `v0.2.1` (`cat VERSION`), you can pull `docker pull ghcr.io/nikronic/cvfe:v0.2.1`.
+
+Then for running it, use:
+> `docker run -p YOUR_HOST_PORT:CONTAINER_PORT ghcr.io/nikronic/cvfe:DESIRED_VERSION python -m cvfe.main --bind 0.0.0.0 --port CONTAINER_PORT`
+
+For example:
+> `docker run -p 9999:8000 ghcr.io/nikronic/cvfe:v0.2.1 python -m cvfe.main --bind 0.0.0.0 --port 8000`
+
+*note:* All the images can be found on the [repo packages](https://github.com/Nikronic/canada-visa-form-extraction/pkgs/container/cvfe).
+
+**Manual Image**:
 We have provided a `Dockerfile` for ease of install using `docker`. Please use:
 > `docker build -t cvfe .`
 
