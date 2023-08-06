@@ -100,9 +100,12 @@ async def convert(
     form_5257: fastapi.UploadFile,
     form_5645: fastapi.UploadFile,
     post_url: Optional[str] = None):
+
     try:
         # save files to disk
         input_path: Path = BASE_SOURCE_DIR / Path('x/')
+        # create the path if does not exist
+        input_path.mkdir(parents=True, exist_ok=True)
         with open(input_path / Path('5257.pdf'), 'wb') as f:
             contents_form_5257 = await form_5257.read()
             f.write(contents_form_5257)
