@@ -120,7 +120,16 @@ async def convert(
 
         logger.info('Process finished')
         response = [data.iloc[0].to_dict()]
-
+    
+    except Exception as error:
+        logger.exception(error)
+        e = sys.exc_info()[1]
+        raise fastapi.HTTPException(
+            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            detail=str(e))
+    
+    try:
+        response_status_code: int = -1
         # if third-party url is provided, send post request to that
         if post_url:
             # make response jsonable
@@ -130,13 +139,19 @@ async def convert(
                 url=post_url,
                 json=jsonable_response
             )
-            logger.info(f'DB response code {post_response.status_code}')
+            response_status_code = post_response.status_code
+            logger.info(f'post response code {post_response.status_code}')
 
+            # raise exception if bad status code
+            if not post_response.ok:
+                raise fastapi.HTTPException(
+                    status_code=post_response.status_code,
+                    detail=post_response.text)
         return response
     
     except Exception as error:
         logger.exception(error)
         e = sys.exc_info()[1]
         raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_400_BAD_REQUEST,
+            status_code=response_status_code,
             detail=str(e))
