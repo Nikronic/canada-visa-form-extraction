@@ -619,7 +619,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
             logger.debug(
                 (f'"{string}" country code could not be found'
                 f'in the config file="{self.config_path}".'))
-            return 'Unknown'  # '000' code in XFA forms
+            return CanadaFillna.CountryCode_5257e.value
 
     def file_specific_basic_transform(self, type: DocTypes, path: str) -> pd.DataFrame:
         canada_xfa = CanadaXFA()  # Canada PDF to XML
@@ -672,49 +672,49 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='P1.PD.VisaType.VisaType',
                 dtype=str,
                 if_nan='fill',
-                value='OTHER'
+                value=CanadaFillna.VisaType_5257e.value
             )
             # Birth City: String -> categorical
             dataframe = self.change_dtype(
                 col_name='P1.PD.PlaceBirthCity',
                 dtype=str,
                 if_nan='fill',
-                value='OTHER'
+                value=CanadaFillna.PlaceBirthCity_5257e.value
             )
             # Birth country: string -> categorical
             dataframe = self.change_dtype(
                 col_name='P1.PD.PlaceBirthCountry',
                 dtype=str,
                 if_nan='fill',
-                value='IRAN'
+                value=CanadaFillna.Country_5257e.value
             )
             # citizen of: string -> categorical
             dataframe = self.change_dtype(
                 col_name='P1.PD.Citizenship.Citizenship',
                 dtype=str,
                 if_nan='fill',
-                value='IRAN'
+                value=CanadaFillna.Citizenship_5257e.value
             )
             # current country of residency: string -> categorical
             dataframe = self.change_dtype(
                 col_name='P1.PD.CurrCOR.Row2.Country',
                 dtype=str,
                 if_nan='fill',
-                value='IRAN'
+                value=CanadaFillna.Country_5257e.value
             )
             # current country of residency status: string -> categorical
             dataframe = self.change_dtype(
                 col_name='P1.PD.CurrCOR.Row2.Status',
                 dtype=np.int8,
                 if_nan='fill',
-                value=np.int8(6)  # 6=OTHER in the form
+                value=np.int8(CanadaFillna.ResidencyStatus_5257e.value)
             )
             # current country of residency other description: bool -> categorical
             dataframe = self.change_dtype(
                 col_name='P1.PD.CurrCOR.Row2.Other',
                 dtype=bool,
                 if_nan='fill',
-                value=False
+                value=CanadaFillna.OtherDescriptionIndicator_5257e.value
             )
             # validation date of information, i.e. current date: datetime
             dataframe = self.change_dtype(
@@ -760,14 +760,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                     col_name='P1.PD.PrevCOR.Row'+str(i)+'.Country',
                     dtype=str,
                     if_nan='fill',
-                    value='OTHER'
+                    value=CanadaFillna.PreviousCountry_5257e.value
                 )
                 # previous country of residency status 02: string -> categorical
                 dataframe = self.change_dtype(
                     col_name='P1.PD.PrevCOR.Row'+str(i)+'.Status',
                     dtype=np.int8,
                     if_nan='fill',
-                    value=np.int8(6)
+                    value=np.int8(CanadaFillna.ResidencyStatus_5257e.value)
                 )
                 # previous country of residency 02 period (P1.PD.PrevCOR.Row2): string -> datetime -> int days
                 dataframe = self.change_dtype(
@@ -788,21 +788,21 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='P1.PD.CWA.Row2.Country',
                 dtype=str,
                 if_nan='fill',
-                value='OTHER'
+                value=CanadaFillna.CountryWhereApplying_5257e.value
             )
             # country where applying status: string -> categorical
             dataframe = self.change_dtype(
                 col_name='P1.PD.CWA.Row2.Status',
                 dtype=np.int8,
                 if_nan='fill',
-                value=np.int8(6)
+                value=np.int8(CanadaFillna.ResidencyStatus_5257e.value)
             )
             # country where applying other: string -> categorical
             dataframe = self.change_dtype(
                 col_name='P1.PD.CWA.Row2.Other',
                 dtype=bool,
                 if_nan='fill',
-                value=False
+                value=CanadaFillna.OtherDescriptionIndicator_5257e.value
             )
             # country where applying period: datetime -> int days
             dataframe = self.change_dtype(
@@ -832,7 +832,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='P2.MS.SecA.TypeOfRelationship',
                 dtype=str,
                 if_nan='fill',
-                value='OTHER'
+                value=CanadaFillna.MarriageType_5257e.value
             )
             # previous spouse age period: string -> datetime -> int days
             dataframe = self.change_dtype(
@@ -859,7 +859,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='P2.MS.SecA.Psprt.CountryofIssue.CountryofIssue',
                 dtype=str,
                 if_nan='fill',
-                value='OTHER'
+                value=CanadaFillna.PassportCountry_5257e.value
             )
             # expiry remaining period: datetime -> int days
             # if None, fill with 1 year ago, ie. period=1year
@@ -876,14 +876,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='P2.MS.SecA.Langs.languages.nativeLang.nativeLang',
                 dtype=str,
                 if_nan='fill',
-                value='IRAN'
+                value=CanadaFillna.NativeLang_5257e.value
             )
             # communication lang: Eng, Fr, both, none -> categorical
             dataframe = self.change_dtype(
                 col_name='P2.MS.SecA.Langs.languages.ableToCommunicate.ableToCommunicate',
                 dtype=str,
                 if_nan='fill',
-                value='NEITHER'
+                value=CanadaFillna.LanguagesAbleToCommunicate_5257e.value
             )
             # language official test: bool -> binary
             dataframe['P2.MS.SecA.Langs.LangTest'] = dataframe['P2.MS.SecA.Langs.LangTest'].apply(
@@ -896,7 +896,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='P2.natID.natIDdocs.CountryofIssue.CountryofIssue',
                 dtype=str,
                 if_nan='fill',
-                value='IRAN'
+                value=CanadaFillna.IDCountry_5257e.value
             )
             # United States doc: bool -> binary
             dataframe['P2.USCard.q1.usCardIndicator'] = dataframe['P2.USCard.q1.usCardIndicator'].apply(
@@ -912,14 +912,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='P3.DOV.PrpsRow1.PrpsOfVisit.PrpsOfVisit',
                 dtype=np.int8,
                 if_nan='fill',
-                value=np.int8(7)
+                value=np.int8(CanadaFillna.PurposeOfVisit_5257e.value)
             )  # 7 is other in the form
             # purpose of visit description: string -> binary
             dataframe = self.change_dtype(
                 col_name='P3.DOV.PrpsRow1.Other.Other',
                 dtype=bool,
                 if_nan='fill',
-                value=False
+                value=CanadaFillna.OtherDescriptionIndicator_5257e.value
             )
             # how long going to stay: None -> datetime (0 days)
             dataframe = self.change_dtype(
@@ -945,14 +945,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='P3.DOV.cntcts_Row1.RelationshipToMe.RelationshipToMe',
                 dtype=str,
                 if_nan='fill',
-                value='OTHER'
+                value=CanadaFillna.ContactType_5257e.value
             )
             # relation to applicant of purpose of visit 02: string -> categorical
             dataframe = self.change_dtype(
                 col_name='P3.cntcts_Row2.Relationship.RelationshipToMe',
                 dtype=str,
                 if_nan='fill',
-                value='OTHER'
+                value=CanadaFillna.ContactType_5257e.value
             )
             # higher education: bool -> binary
             dataframe['P3.Edu.EduIndicator'] = dataframe['P3.Edu.EduIndicator'].apply(
@@ -975,7 +975,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='P3.Edu.Edu_Row1.Country.Country',
                 dtype=str,
                 if_nan='fill',
-                value='IRAN'
+                value=CanadaFillna.Country_5257e.value
             )
             # field of study: string -> categorical
             dataframe['P3.Edu.Edu_Row1.FieldOfStudy'] = dataframe['P3.Edu.Edu_Row1.FieldOfStudy'].astype(
@@ -1005,14 +1005,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                     col_name='P3.Occ.OccRow'+str(i)+'.Occ.Occ',
                     dtype=str,
                     if_nan='fill',
-                    value='OTHER'
+                    value=CanadaFillna.Occupation_5257e.value
                 )
                 # occupation country: string -> categorical
                 dataframe = self.change_dtype(
                     col_name='P3.Occ.OccRow'+str(i)+'.Country.Country',
                     dtype=str,
                     if_nan='fill',
-                    value='IRAN'
+                    value=CanadaFillna.Country_5257e.value
                 )
 
             # medical details: string -> binary
@@ -1020,14 +1020,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='P3.BGI.Details.MedicalDetails',
                 dtype=bool,
                 if_nan='fill',
-                value=False
+                value=CanadaFillna.IndicatorField_5257e.value
             )
             # other than medical: string -> binary
             dataframe = self.change_dtype(
                 col_name='P3.BGI.otherThanMedic',
                 dtype=bool,
                 if_nan='fill',
-                value=False
+                value=CanadaFillna.IndicatorField_5257e.value
             )
             # without authentication stay, work, etc: bool -> binary
             dataframe['P3.noAuthStay'] = dataframe['P3.noAuthStay'].apply(
@@ -1093,7 +1093,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                     col_name=c,
                     dtype=np.int16,
                     if_nan='fill',
-                    value=np.int16('0')
+                    value=np.int16(CanadaFillna.VisaApplicationType_5645e.value)
                 )
             # drop all Accompany=No and only rely on Accompany=Yes using binary state
             self.column_dropper(string='No', inplace=True)
@@ -1102,7 +1102,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='p1.SecA.App.ChdMStatus',
                 dtype=np.int16,
                 if_nan='fill',
-                value=np.int16(CanadaFillna.ChdMStatus_5645e.value)
+                value=np.int16(CanadaFillna.ChildMarriageStatus_5645e.value)
             )
             # validation date of information, i.e. current date: datetime
             dataframe = self.change_dtype(
@@ -1130,7 +1130,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='p1.SecA.Sps.SpsOcc',
                 dtype=str,
                 if_nan='fill',
-                value='OTHER'
+                value=CanadaFillna.Occupation_5257e.value
             )
             # spouse accompanying: coming=True or not_coming=False
             dataframe['p1.SecA.Sps.SpsAccomp'] = dataframe['p1.SecA.Sps.SpsAccomp'].apply(
@@ -1148,14 +1148,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='p1.SecA.Mo.MoOcc',
                 dtype=str,
                 if_nan='fill',
-                value='OTHER'
+                value=CanadaFillna.Occupation_5257e.value
             )
             # mother marriage status: int -> categorical
             dataframe = self.change_dtype(
                 col_name='p1.SecA.Mo.ChdMStatus',
                 dtype=np.int16,
                 if_nan='fill',
-                value=np.int16(CanadaFillna.ChdMStatus_5645e.value)
+                value=np.int16(CanadaFillna.ChildMarriageStatus_5645e.value)
             )
             # mother accompanying: coming=True or not_coming=False
             dataframe['p1.SecA.Mo.MoAccomp'] = dataframe['p1.SecA.Mo.MoAccomp'].apply(
@@ -1173,14 +1173,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='p1.SecA.Fa.FaOcc',
                 dtype=str,
                 if_nan='fill',
-                value='OTHER'
+                value=CanadaFillna.Occupation_5257e.value
             )
             # father marriage status: int -> categorical
             dataframe = self.change_dtype(
                 col_name='p1.SecA.Fa.ChdMStatus',
                 dtype=np.int16,
                 if_nan='fill',
-                value=np.int16(CanadaFillna.ChdMStatus_5645e.value)
+                value=np.int16(CanadaFillna.ChildMarriageStatus_5645e.value)
             )
             # father accompanying: coming=True or not_coming=False
             dataframe['p1.SecA.Fa.FaAccomp'] = dataframe['p1.SecA.Fa.FaAccomp'].apply(
@@ -1196,14 +1196,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                     col_name='p1.SecB.Chd.['+str(i)+'].ChdMStatus',
                     dtype=np.int16,
                     if_nan='fill',
-                    value=np.int16(CanadaFillna.ChdMStatus_5645e.value)
+                    value=np.int16(CanadaFillna.ChildMarriageStatus_5645e.value)
                 )
                 # child's relationship 01: string -> categorical
                 dataframe = self.change_dtype(
                     col_name='p1.SecB.Chd.['+str(i)+'].ChdRel',
                     dtype=str,
                     if_nan='fill',
-                    value='OTHER'
+                    value=CanadaFillna.ChildRelation_5645e.value
                 )
                 # child's date of birth 01: string -> datetime
                 dataframe = self.change_dtype(
@@ -1217,21 +1217,21 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                     col_name='p1.SecB.Chd.['+str(i)+'].ChdCOB',
                     dtype=str,
                     if_nan='fill',
-                    value='IRAN'
+                    value=CanadaFillna.Country_5257e.value
                 )
                 # child's occupation type 01 (issue #2): string -> categorical
                 dataframe = self.change_dtype(
                     col_name='p1.SecB.Chd.['+str(i)+'].ChdOcc',
                     dtype=str,
                     if_nan='fill',
-                    value='OTHER'
+                    value=CanadaFillna.Occupation_5257e.value
                 )
                 # child's marriage status: int -> categorical
                 dataframe = self.change_dtype(
                     col_name='p1.SecB.Chd.['+str(i)+'].ChdMStatus',
                     dtype=np.int16,
                     if_nan='fill',
-                    value=np.int16(CanadaFillna.ChdMStatus_5645e.value)
+                    value=np.int16(CanadaFillna.ChildMarriageStatus_5645e.value)
                 )
                 # child's accompanying 01: coming=True or not_coming=False
                 dataframe['p1.SecB.Chd.['+str(i)+'].ChdAccomp'] = dataframe['p1.SecB.Chd.['+str(i)+'].ChdAccomp'].apply(
@@ -1260,14 +1260,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                     col_name='p1.SecC.Chd.['+str(i)+'].ChdMStatus',
                     dtype=np.int16,
                     if_nan='fill',
-                    value=np.int16(CanadaFillna.ChdMStatus_5645e.value)
+                    value=np.int16(CanadaFillna.ChildMarriageStatus_5645e.value)
                 )
                 # sibling's relationship 01: string -> categorical
                 dataframe = self.change_dtype(
                     col_name='p1.SecC.Chd.['+str(i)+'].ChdRel',
                     dtype=str,
                     if_nan='fill',
-                    value='OTHER'
+                    value=CanadaFillna.ChildRelation_5645e.value
                 )
                 # sibling's date of birth 01: string -> datetime
                 dataframe = self.change_dtype(
@@ -1281,14 +1281,14 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                     col_name='p1.SecC.Chd.['+str(i)+'].ChdCOB',
                     dtype=str,
                     if_nan='fill',
-                    value='IRAN'
+                    value=CanadaFillna.Country_5257e.value
                 )
                 # sibling's occupation type 01 (issue #2): string -> categorical
                 dataframe = self.change_dtype(
                     col_name='p1.SecC.Chd.['+str(i)+'].ChdOcc',
                     dtype=str,
                     if_nan='fill',
-                    value='OTHER'
+                    value=CanadaFillna.Occupation_5257e.value
                 )
                 # sibling's accompanying: coming=True or not_coming=False
                 dataframe['p1.SecC.Chd.['+str(i)+'].ChdAccomp'] = dataframe['p1.SecC.Chd.['+str(i)+'].ChdAccomp'].apply(
@@ -1316,7 +1316,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 col_name='VisaResult',
                 dtype=np.int8,
                 if_nan='fill',
-                value=np.int8(0)
+                value=np.int8(CanadaFillna.VisaResult.value)
             )
             return dataframe
 
