@@ -1238,7 +1238,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                     lambda x: True if x == '1' else False)
 
                 # check if the child does not exist and fill it properly (ghost case monkaS)
-                if (dataframe['p1.SecB.Chd.['+str(i)+'].ChdMStatus'] == CanadaFillna.ChdMStatus_5645e.value).all() \
+                if (dataframe['p1.SecB.Chd.['+str(i)+'].ChdMStatus'] == CanadaFillna.ChildMarriageStatus_5645e.value).all() \
                         and (dataframe['p1.SecB.Chd.['+str(i)+'].ChdRel'] == 'OTHER').all() \
                         and (dataframe['p1.SecB.Chd.['+str(i)+'].ChdDOB'].isna()).all() \
                         and (dataframe['p1.SecB.Chd.['+str(i)+'].ChdAccomp'] == False).all():
@@ -1295,7 +1295,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                     lambda x: True if x == '1' else False)
 
                 # check if the sibling does not exist and fill it properly (ghost case monkaS)
-                if (dataframe['p1.SecC.Chd.['+str(i)+'].ChdMStatus'] == CanadaFillna.ChdMStatus_5645e.value).all() \
+                if (dataframe['p1.SecC.Chd.['+str(i)+'].ChdMStatus'] == CanadaFillna.ChildMarriageStatus_5645e.value).all() \
                         and (dataframe['p1.SecC.Chd.['+str(i)+'].ChdRel'] == 'OTHER').all() \
                         and (dataframe['p1.SecC.Chd.['+str(i)+'].ChdOcc'].isna()).all() \
                         and (dataframe['p1.SecC.Chd.['+str(i)+'].ChdAccomp'] == False).all():
