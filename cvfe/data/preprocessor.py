@@ -616,8 +616,9 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
         if country:
             return self.CANADA_COUNTRY_CODE_TO_NAME[country]
         else:
-            logger.debug('"{}" country code could not be found in the config file="{}".'.format(
-                string, self.config_path))
+            logger.debug(
+                (f'"{string}" country code could not be found'
+                f'in the config file="{self.config_path}".'))
             return 'Unknown'  # '000' code in XFA forms
 
     def file_specific_basic_transform(self, type: DocTypes, path: str) -> pd.DataFrame:

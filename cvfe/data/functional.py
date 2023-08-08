@@ -424,14 +424,10 @@ def change_dtype(
                 # we want YYYY-MM-DD
                 # MMDDYYYY format (Canada Common Forms)
                 if len(value) == 8 and value.isnumeric():
-                    value = '{}-{}-{}'.format(
-                        value[4:],
-                        value[2:4],
-                        value[0:2]
-                    )
-
+                    value = f'{value[4:]}-{value[2:4]}-{value[0:2]}'
                 # fix values
-                if value[5:7] == '02' and value[8:10] == '30':  # using >28 for February
+                if value[5:7] == '02' and value[8:10] == '30': 
+                    # using >28 for February
                     value = '28'.join(value.rsplit('30', 1))
         return value
 
@@ -537,12 +533,12 @@ def flatten_dict(d: dict) -> dict:
                 # nested subtree
                 if isinstance(value, dict):
                     for subkey, subvalue in flatten_dict(value).items():
-                        yield '{}.{}'.format(key, subkey), subvalue
+                        yield f'{key}.{subkey}', subvalue
                 # nested list
                 elif isinstance(value, list):
                     for num, elem in enumerate(value):
                         for subkey, subvalue in flatten_dict(elem).items():
-                            yield '{}.[{}].{}'.format(key, num, subkey), subvalue
+                            yield f'{key}.[{num}].{subkey}', subvalue
                 # everything else (only leafs should remain)
                 else:
                     yield key, value
