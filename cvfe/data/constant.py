@@ -216,7 +216,33 @@ class CanadaFillna(Enum):
         as a separate feature in categorical mode.
     """
 
-    ChdMStatus_5645e = 9
+    # 5257e
+    CountryCode_5257e = 'Unknown'
+    VisaType_5257e = 'OTHER'
+    PlaceBirthCity_5257e = 'OTHER'
+    Country_5257e = 'IRAN'
+    Citizenship_5257e = 'IRAN'
+    ResidencyStatus_5257e = 6
+    OtherDescriptionIndicator_5257e = False
+    PreviousCountry_5257e = 'OTHER'
+    CountryWhereApplying_5257e = 'OTHER'
+    MarriageType_5257e = 'OTHER'
+    PassportCountry_5257e = 'OTHER'
+    NativeLang_5257e = 'IRAN'
+    LanguagesAbleToCommunicate_5257e = 'NEITHER'
+    IDCountry_5257e = 'IRAN'
+    PurposeOfVisit_5257e = 7
+    ContactType_5257e = 'OTHER'
+    Occupation_5257e = 'OTHER'
+    IndicatorField_5257e = False
+
+    # 5645e
+    VisaApplicationType_5645e = '0'
+    ChildMarriageStatus_5645e = 9
+    ChildRelation_5645e = 'OTHER'
+
+    # Visa result (manual file created by me :D)
+    VisaResult = 0
 
 
 class CustomNamingEnum(Enum):
