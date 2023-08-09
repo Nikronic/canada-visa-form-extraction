@@ -1,0 +1,17 @@
+name: API Test
+
+on:
+  push:
+  pull_request:
+    branches: [ "main" ]
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Build the package
+      run: pip install .[test]
+    - name: Run the tests
+      run: pytest --bind 0.0.0.0 --port 45678
