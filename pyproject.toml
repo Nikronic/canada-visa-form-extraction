@@ -10,7 +10,7 @@ readme = "README.md"
 keywords = ["visa", "extractor", "canada", "5257e", "5645e"]
 license = { file = "LICENSE" }
 classifiers = [
-    "License :: OSI Approved :: GNU GENERAL PUBLIC LICENSE",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.10",
     "Development Status :: 4 - Beta",
