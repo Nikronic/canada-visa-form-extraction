@@ -1,2 +1,54 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cvfe"
+authors = [{ name = "Nikan Doosti", email = "nikan.doosti@outlook.com" }]
+description = "Canada Visa Forms (5257e and 5645e) Extractor."
+readme = "README.md"
+keywords = ["visa", "extractor", "canada", "5257e", "5645e"]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+
+]
+
+requires-python = ">=3.10.6"
+dependencies = [
+    "pip>=23.1.2",
+    "pandas>=1.5.3",
+    "xmltodict>=0.13.0",
+    "pikepdf>=8.2.1",
+    "pypdf2>=3.0.1",
+    "pydantic>=2.0.3",
+    "fastapi>=0.100.0",
+    "gunicorn>=21.2.0",
+    "uvicorn>=0.23.1",
+    "python-multipart>=0.0.6",
+    "pydantic-settings>=2.0.2",
+    "pyngrok>=6.0.0",
+    "requests>=2.31.0",
+]
+
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {file = "VERSION"}
+
+[project.optional-dependencies]
+test = ["httpx>=0.24.1", "pytest>=7.4.0"]
+
+[tool.setuptools]
+include-package-data = true
+[tool.setuptools.packages.find]
+where = ["cvfe"]
+[tool.setuptools.package-data]
+mypkg = ["*.csv"]
+
+[project.urls]
+Homepage = "https://github.com/Nikronic/canada-visa-form-extraction"
