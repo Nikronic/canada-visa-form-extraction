@@ -44,6 +44,7 @@ extensions = [
     'sphinx.ext.githubpages',
     'sphinx.ext.autosectionlabel',
     'sphinx_copybutton',
+    'myst_parser',
 ]
 
 napoleon_use_ivar = True
