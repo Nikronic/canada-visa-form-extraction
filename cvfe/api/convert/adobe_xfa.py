@@ -157,4 +157,4 @@ async def convert(
         e = sys.exc_info()[1]
         raise fastapi.HTTPException(
             status_code=response_status_code,
-            detail=str(e))
+            detail=str(e) if type(e) == str else str(e.detail))
