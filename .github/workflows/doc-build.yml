@@ -34,7 +34,7 @@ jobs:
       - name: install package and docs optional dependencies
         run: pip install .[doc]
       - name: build docs
-        run: make html
+        run: cd docs && make html
   # Single deploy job since we're just deploying
   deploy:
     environment:
@@ -50,7 +50,7 @@ jobs:
         uses: actions/upload-pages-artifact@v2
         with:
           # Upload entire repository
-          path: 'docs/build/html'
+          path: 'build/html'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
