@@ -1,8 +1,8 @@
 name: Docker Image CI
 
 on:
-  push:
-    branches: [ "main" ]
+  release:
+    types: [created]
 
 env:
   IMAGE_NAME: cvfe
