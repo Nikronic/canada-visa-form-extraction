@@ -45,7 +45,7 @@ jobs:
       - name: where the hell are we
         run: pwd
       - name: what the hell is here
-        run: la
+        run: tree -d -L 3
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
