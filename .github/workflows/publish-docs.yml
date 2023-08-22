@@ -1,9 +1,9 @@
 name: Deploy static content to Pages
 
 on:
-  # Runs on any release
-  release:
-      types: [created]
+  pull_request:
+    types:
+      - closed
   
   workflow_dispatch:
 
@@ -24,6 +24,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Check if PR is from release branch to main
+        id: check-pr
+        run: |
+          if [[ ${{ github.event.pull_request.base.ref }} == "main" && ${{ github.event.pull_request.head.ref }} =~ ^release-v.*$ ]]; then
+            echo "PR is from a release branch to main."
+            echo "::set-output name=trigger_deploy::true"
+          else
+            echo "PR is not from a release branch to main."
+            echo "::set-output name=trigger_deploy::false"
+          fi
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -39,5 +49,6 @@ jobs:
         with:
           path: 'docs/build/html'
       - name: Deploy to GitHub Pages
+        if: steps.check-pr.outputs.trigger_deploy == 'true'
         id: deployment
         uses: actions/deploy-pages@v2
