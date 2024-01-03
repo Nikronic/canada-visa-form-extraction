@@ -41,6 +41,7 @@ dynamic = ["version"]
 version = {file = "VERSION"}
 
 [project.optional-dependencies]
+format = ["pre-commit>=3.6.0"]
 test = ["httpx>=0.24.1", "pytest>=7.4.0"]
 doc = [
     "sphinx>=7.1.2",
