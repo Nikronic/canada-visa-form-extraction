@@ -217,11 +217,11 @@ class DocTypes(Enum):
     CANADA_LABEL = 4  # containing labels
 
 
-class CanadaCutoffTerms(Enum):
-    """Dict of cut off terms for different files that is can be used with :func:`dict_summarizer <vizard.data.functional.dict_summarizer>`"""
+class CanadaCutoffTerms:
+    """Dict of cut off terms for different files that is can be used with :func:`vizard.data.functional.dict_summarizer"""
 
-    ca5645e = "IMM_5645"
-    ca5257e = "form1"
+    CA5645E = "IMM_5645"
+    CA5257E = "form1"
 
 
 class CanadaFillna(Enum):

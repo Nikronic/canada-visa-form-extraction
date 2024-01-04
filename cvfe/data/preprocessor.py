@@ -198,7 +198,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
             # clean flattened dict
             data_dict = functional.dict_summarizer(
                 data_dict,
-                cutoff_term=CanadaCutoffTerms.ca5257e.value,
+                cutoff_term=CanadaCutoffTerms.CA5257E,
                 KEY_ABBREVIATION_DICT=CANADA_5257E_KEY_ABBREVIATION,
                 VALUE_ABBREVIATION_DICT=CANADA_5257E_VALUE_ABBREVIATION,
             )
@@ -641,7 +641,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
             # clean flattened dict
             data_dict = functional.dict_summarizer(
                 data_dict,
-                cutoff_term=CanadaCutoffTerms.ca5645e.value,
+                cutoff_term=CanadaCutoffTerms.CA5645E,
                 KEY_ABBREVIATION_DICT=CANADA_5645E_KEY_ABBREVIATION,
                 VALUE_ABBREVIATION_DICT=None,
             )
