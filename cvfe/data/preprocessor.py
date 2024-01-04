@@ -9,7 +9,7 @@ __all__ = [
 
 import logging
 import shutil
-from typing import Any, Callable, Union
+from typing import Any, Callable, Optional
 
 import numpy as np
 import pandas as pd
@@ -50,10 +50,10 @@ class DataframePreprocessor:
     def column_dropper(
         self,
         string: str,
-        exclude: str = None,
+        exclude: Optional[str] = None,
         regex: bool = False,
         inplace: bool = True,
-    ) -> Union[None, pd.DataFrame]:
+    ) -> Optional[pd.DataFrame]:
         """See :func:`cvfe.data.functional.column_dropper` for more information"""
 
         return functional.column_dropper(
@@ -68,10 +68,10 @@ class DataframePreprocessor:
         self,
         col_base_name: str,
         type: DocTypes,
-        one_sided: Union[str, bool],
-        date: str = None,
+        one_sided: str | bool,
+        date: Optional[str] = None,
         inplace: bool = False,
-    ) -> Union[None, pd.DataFrame]:
+    ) -> Optional[pd.DataFrame]:
         """See :func:`cvfe.data.functional.fillna_datetime` for more details"""
         if date is None:
             date = T0
@@ -90,10 +90,10 @@ class DataframePreprocessor:
         col_base_name: str,
         new_col_name: str,
         type: DocTypes,
-        if_nan: Union[str, Callable, None] = None,
-        one_sided: str = None,
-        reference_date: str = None,
-        current_date: str = None,
+        if_nan: Optional[str | Callable] = None,
+        one_sided: Optional[str] = None,
+        reference_date: Optional[str] = None,
+        current_date: Optional[str] = None,
     ) -> pd.DataFrame:
         """See :func:`cvfe.data.functional.aggregate_datetime` for more details"""
         return functional.aggregate_datetime(
@@ -109,7 +109,7 @@ class DataframePreprocessor:
 
     def file_specific_basic_transform(self, type: DocTypes, path: str) -> pd.DataFrame:
         """
-        Takes a specific file then does data type fixing, missing value filling, descretization, etc.
+        Takes a specific file then does data type fixing, missing value filling, discretization, etc.
 
         Note:
             Since each files has its own unique tags and requirements,
@@ -117,8 +117,9 @@ class DataframePreprocessor:
             hence this method exists to just improve readability without any generalization
             to other problems or even files.
 
-        args:
-            type: The input document type (see :class:`DocTypes <cvfe.data.constant.DocTypes>`)
+        Args:
+            type (DocTypes): The input document type (see :class:`DocTypes <cvfe.data.constant.DocTypes>`)
+            path (str): Path to the input document
         """
 
         raise NotImplementedError
@@ -127,7 +128,7 @@ class DataframePreprocessor:
         self,
         col_name: str,
         dtype: Callable,
-        if_nan: Union[str, Callable] = "skip",
+        if_nan: str | Callable = "skip",
         **kwargs,
     ):
         """See :func:`cvfe.data.functional.change_dtype` for more details"""
@@ -144,8 +145,8 @@ class DataframePreprocessor:
         """
         Take a config CSV and return a dictionary of key and values
 
-        args:
-            path: string path to config file
+        Args:
+            path (str): string path to config file
         """
 
         config_df = pd.read_csv(path)
@@ -155,7 +156,7 @@ class DataframePreprocessor:
 
 
 class CanadaDataframePreprocessor(DataframePreprocessor):
-    def __init__(self, dataframe: pd.DataFrame = None) -> None:
+    def __init__(self, dataframe: Optional[pd.DataFrame] = None) -> None:
         super().__init__(dataframe)
         self.base_date = (
             None  # the time forms were filled, considered "today" for forms
@@ -169,8 +170,9 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
         """
         Converts the (custom and non-standard) code of a country to its name given the XFA docs LOV section.
         # TODO: integrate this into `file_specific...` after verifying it in `'notebooks/data_exploration_dev.ipynb'`
-        args:
-            string: input code string
+
+        Args:
+            string (str): input code string
         """
 
         country = [c for c in self.CANADA_COUNTRY_CODE_TO_NAME.keys() if string in c]
