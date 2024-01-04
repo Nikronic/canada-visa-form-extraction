@@ -169,7 +169,6 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
     def convert_country_code_to_name(self, string: str) -> str:
         """
         Converts the (custom and non-standard) code of a country to its name given the XFA docs LOV section.
-        # TODO: integrate this into `file_specific...` after verifying it in `'notebooks/data_exploration_dev.ipynb'`
 
         Args:
             string (str): input code string
@@ -932,8 +931,8 @@ class FileTransform:
         """
 
         Args:
-            src: source file to be processed
-            dst: the pass that the processed file to be saved
+            src (str): source file to be processed
+            dst (str): the pass that the processed file to be saved
         """
         pass
 
@@ -1024,11 +1023,11 @@ class FileTransformCompose:
         Transforms will be applied in order of the keys in the dictionary
     """
 
-    def __init__(self, transforms: dict) -> None:
+    def __init__(self, transforms: dict[FileTransform, str]) -> None:
         """
 
         Args:
-            transforms: a dictionary of transforms, where the key is the instance of
+            transforms (dict[FileTransform, str]): a dictionary of transforms, where the key is the instance of
                 FileTransform and the value is the keyword that the transform will be
                 applied to
 
