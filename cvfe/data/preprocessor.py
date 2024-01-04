@@ -188,10 +188,10 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
     def file_specific_basic_transform(self, type: DocTypes, path: str) -> pd.DataFrame:
         canada_xfa = CanadaXFA()  # Canada PDF to XML
 
-        if type == DocTypes.canada_5257e:
+        if type == DocTypes.CANADA_5257E:
             # XFA to XML
             xml = canada_xfa.extract_raw_content(path)
-            xml = canada_xfa.clean_xml_for_csv(xml=xml, type=DocTypes.canada_5257e)
+            xml = canada_xfa.clean_xml_for_csv(xml=xml, type=DocTypes.CANADA_5257E)
             # XML to flattened dict
             data_dict = canada_xfa.xml_to_flattened_dict(xml=xml)
             data_dict = canada_xfa.flatten_dict(data_dict)
@@ -631,10 +631,10 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
 
             return dataframe
 
-        if type == DocTypes.canada_5645e:
+        if type == DocTypes.CANADA_5645E:
             # XFA to XML
             xml = canada_xfa.extract_raw_content(path)
-            xml = canada_xfa.clean_xml_for_csv(xml=xml, type=DocTypes.canada_5645e)
+            xml = canada_xfa.clean_xml_for_csv(xml=xml, type=DocTypes.CANADA_5645E)
             # XML to flattened dict
             data_dict = canada_xfa.xml_to_flattened_dict(xml=xml)
             data_dict = canada_xfa.flatten_dict(data_dict)
@@ -903,7 +903,7 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
 
             return dataframe
 
-        if type == DocTypes.canada_label:
+        if type == DocTypes.CANADA_LABEL:
             dataframe = pd.read_csv(path, sep=" ", names=["VisaResult"])
             functional.change_dtype(
                 dataframe=dataframe,

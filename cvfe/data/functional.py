@@ -362,9 +362,9 @@ def tag_to_regex_compatible(string: str, type: DocTypes) -> str:
     """
 
     if (
-        type == DocTypes.canada_5257e
-        or type == DocTypes.canada_5645e
-        or type == DocTypes.canada
+        type == DocTypes.CANADA_5257E
+        or type == DocTypes.CANADA_5645E
+        or type == DocTypes.CANADA
     ):
         string = string.replace(".", "\.").replace("[", "\[").replace("]", "\]")
 

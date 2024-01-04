@@ -211,10 +211,10 @@ class DocTypes(Enum):
     and its order are meaningless.
     """
 
-    canada = 1  # referring to all Canada docs in general
-    canada_5257e = 2  # application for visitor visa (temporary resident visa)
-    canada_5645e = 3  # Family information
-    canada_label = 4  # containing labels
+    CANADA = 1  # referring to all Canada docs in general
+    CANADA_5257E = 2  # application for visitor visa (temporary resident visa)
+    CANADA_5645E = 3  # Family information
+    CANADA_LABEL = 4  # containing labels
 
 
 class CanadaCutoffTerms(Enum):
