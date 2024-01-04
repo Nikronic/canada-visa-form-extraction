@@ -224,7 +224,7 @@ class CanadaCutoffTerms:
     CA5257E = "form1"
 
 
-class CanadaFillna(Enum):
+class CanadaFillna:
     """Values used to fill ``None`` s depending on the form structure
 
     Members follow the ``<field_name>_<form_name>`` naming convention. The value
@@ -238,32 +238,32 @@ class CanadaFillna(Enum):
     """
 
     # 5257e
-    CountryCode_5257e = "Unknown"
-    VisaType_5257e = "OTHER"
-    PlaceBirthCity_5257e = "OTHER"
-    Country_5257e = "IRAN"
-    Citizenship_5257e = "IRAN"
-    ResidencyStatus_5257e = 6
-    OtherDescriptionIndicator_5257e = False
-    PreviousCountry_5257e = "OTHER"
-    CountryWhereApplying_5257e = "OTHER"
-    MarriageType_5257e = "OTHER"
-    PassportCountry_5257e = "OTHER"
-    NativeLang_5257e = "IRAN"
-    LanguagesAbleToCommunicate_5257e = "NEITHER"
-    IDCountry_5257e = "IRAN"
-    PurposeOfVisit_5257e = 7
-    ContactType_5257e = "OTHER"
-    Occupation_5257e = "OTHER"
-    IndicatorField_5257e = False
+    COUNTRY_CODE_5257E = "Unknown"
+    VISA_TYPE_5257E = "OTHER"
+    PLACE_BIRTH_CITY_5257E = "OTHER"
+    COUNTRY_5257E = "IRAN"
+    CITIZENSHIP_5257E = "IRAN"
+    RESIDENCY_STATUS_5257E = 6
+    OTHER_DESCRIPTION_INDICATOR_5257E = False
+    PREVIOUS_COUNTRY_5257E = "OTHER"
+    COUNTRY_WHERE_APPLYING_5257E = "OTHER"
+    MARRIAGE_TYPE_5257E = "OTHER"
+    PASSPORT_COUNTRY_5257E = "OTHER"
+    NATIVE_LANG_5257E = "IRAN"
+    LANGUAGES_ABLE_TO_COMMUNICATE_5257E = "NEITHER"
+    ID_COUNTRY_5257E = "IRAN"
+    PURPOSE_OF_VISIT_5257E = 7
+    CONTACT_TYPE_5257E = "OTHER"
+    OCCUPATION_5257E = "OTHER"
+    INDICATOR_FIELD_5257E = False
 
     # 5645e
-    VisaApplicationType_5645e = "0"
-    ChildMarriageStatus_5645e = 9
-    ChildRelation_5645e = "OTHER"
+    VISA_APPLICATION_TYPE_5645E = "0"
+    CHILD_MARRIAGE_STATUS_5645E = 9
+    CHILD_RELATION_5645E = "OTHER"
 
     # Visa result (manual file created by me :D)
-    VisaResult = 0
+    VISA_RESULT = 0
 
 
 class CustomNamingEnum(Enum):
