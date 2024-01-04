@@ -126,11 +126,11 @@ mamba install pandas
 #### 1.2.5 Install data extraction dependencies
 
 ```shell
-pip install xmltodict>=0.13.0`
+pip install xmltodict>=0.13.0
 # if conda:
 mamba install -c conda-forge xmltodict>=0.13.0 -y
-pip install pikepdf>=5.1.5`
-pip install pypdf2>=2.2.1`
+pip install pikepdf>=5.1.5
+pip install pypdf2>=2.2.1
 ```
 
 #### 1.2.6 Install API libs
