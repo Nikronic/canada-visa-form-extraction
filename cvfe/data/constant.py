@@ -1,11 +1,20 @@
 __all__ = [
-    'CANADA_5257E_KEY_ABBREVIATION', 'CANADA_5645E_KEY_ABBREVIATION', 'CANADA_5257E_VALUE_ABBREVIATION',
-    'CANADA_5257E_DROP_COLUMNS', 'CANADA_5645E_DROP_COLUMNS', 'DocTypes',
-    'CanadaCutoffTerms', 'CanadaFillna', 'DATEUTIL_DEFAULT_DATETIME', 'T0',
-
+    "CANADA_5257E_KEY_ABBREVIATION",
+    "CANADA_5645E_KEY_ABBREVIATION",
+    "CANADA_5257E_VALUE_ABBREVIATION",
+    "CANADA_5257E_DROP_COLUMNS",
+    "CANADA_5645E_DROP_COLUMNS",
+    "DocTypes",
+    "CanadaCutoffTerms",
+    "CanadaFillna",
+    "DATEUTIL_DEFAULT_DATETIME",
+    "T0",
     # Data Enums shared all over the place
-    'CustomNamingEnum', 'CanadaMarriageStatus',
-    'CanadaContactRelation', 'CanadaResidencyStatus', 'Sex',
+    "CustomNamingEnum",
+    "CanadaMarriageStatus",
+    "CanadaContactRelation",
+    "CanadaResidencyStatus",
+    "Sex",
 ]
 
 import datetime
@@ -13,63 +22,60 @@ from enum import Enum, auto
 from types import DynamicClassAttribute
 from typing import List
 
-
 # DICTIONARY
 CANADA_5257E_KEY_ABBREVIATION = {
-    'Page': 'P',
-    'PersonalDetails': 'PD',
-    'CountryWhereApplying': 'CWA',
-    'MaritalStatus': 'MS',
-    'Section': 'Sec',
-    'ContactInformation': 'CI',
-    'DetailsOfVisit': 'DOV',
-    'Education': 'Edu',
-    'PageWrapper': 'PW',
-    'Occupation': 'Occ',
-    'BackgroundInfo': 'BGI',
-    'Current': 'Curr',
-    'Previous': 'Prev',
-    'Marriage': 'Marr',
-    'Married': 'Marr',
-    'Previously': 'Prev',
-    'Passport': 'Psprt',
-    'Language': 'Lang',
-    'Address': 'Addr',
-    'contact': 'cntct',
-    'Contact': 'cntct',
-    'Resident': 'Resi',
-    'Phone': 'Phn',
-    'Number': 'Num',
-    'Purpose': 'Prps',
-    'HowLongStay': 'HLS',
-    'Signature': 'Sign',
-
+    "Page": "P",
+    "PersonalDetails": "PD",
+    "CountryWhereApplying": "CWA",
+    "MaritalStatus": "MS",
+    "Section": "Sec",
+    "ContactInformation": "CI",
+    "DetailsOfVisit": "DOV",
+    "Education": "Edu",
+    "PageWrapper": "PW",
+    "Occupation": "Occ",
+    "BackgroundInfo": "BGI",
+    "Current": "Curr",
+    "Previous": "Prev",
+    "Marriage": "Marr",
+    "Married": "Marr",
+    "Previously": "Prev",
+    "Passport": "Psprt",
+    "Language": "Lang",
+    "Address": "Addr",
+    "contact": "cntct",
+    "Contact": "cntct",
+    "Resident": "Resi",
+    "Phone": "Phn",
+    "Number": "Num",
+    "Purpose": "Prps",
+    "HowLongStay": "HLS",
+    "Signature": "Sign",
     # more meaningful keys
-    'GovPosition.Choice': 'witnessIllTreat',
-    'Occ.Choice': 'politicViol',
-    'BGI3.Choice': 'criminalRec',
-    'Details.VisaChoice3': 'PrevApply',
-    'BGI2.VisaChoice2': 'refuseDeport',
-    'BGI2.VisaChoice1': 'noAuthStay',
-    'backgroundInfoCalc': 'otherThanMedic'
+    "GovPosition.Choice": "witnessIllTreat",
+    "Occ.Choice": "politicViol",
+    "BGI3.Choice": "criminalRec",
+    "Details.VisaChoice3": "PrevApply",
+    "BGI2.VisaChoice2": "refuseDeport",
+    "BGI2.VisaChoice1": "noAuthStay",
+    "backgroundInfoCalc": "otherThanMedic",
 }
 """Dict of abbreviation used to shortening length of KEYS in XML to CSV conversion
 
 """
 
 CANADA_5645E_KEY_ABBREVIATION = {
-    'page': 'p',
-    'Applicant': 'App',
-    'Mother': 'Mo',
-    'Father': 'Fa',
-    'Section': 'Sec',
-    'Spouse': 'Sps',
-    'Child': 'Chd',
-    'Address': 'Addr',
-    'Occupation': 'Occ',
-    'Yes': 'Accomp',
-    'Relationship': 'Rel',
-
+    "page": "p",
+    "Applicant": "App",
+    "Mother": "Mo",
+    "Father": "Fa",
+    "Section": "Sec",
+    "Spouse": "Sps",
+    "Child": "Chd",
+    "Address": "Addr",
+    "Occupation": "Occ",
+    "Yes": "Accomp",
+    "Relationship": "Rel",
 }
 """Dict of abbreviation used to shortening length of KEYS in XML to CSV conversion
 
@@ -77,18 +83,18 @@ CANADA_5645E_KEY_ABBREVIATION = {
 
 # see #29
 DATEUTIL_DEFAULT_DATETIME = {
-    'day': 1,  # no reason for this value (CluelessClown)
-    'month': 1,  # no reason for this value (CluelessClown)
-    'year': datetime.MINYEAR
+    "day": 1,  # no reason for this value (CluelessClown)
+    "month": 1,  # no reason for this value (CluelessClown)
+    "year": datetime.MINYEAR,
 }
 """A default date for the ``dateutil.parser.parse`` function when some part of date is not provided
 
 """
 
 CANADA_5257E_VALUE_ABBREVIATION = {
-    'BIOMETRIC ENROLMENT': 'Bio',
-    '223': 'IRAN',
-    '045': 'TURKEY',
+    "BIOMETRIC ENROLMENT": "Bio",
+    "223": "IRAN",
+    "045": "TURKEY",
 }
 """Dict of abbreviation used to shortening length of VALUES in XML to CSV conversion
 """
@@ -96,10 +102,9 @@ CANADA_5257E_VALUE_ABBREVIATION = {
 # LIST
 CANADA_5257E_DROP_COLUMNS = [
     # newly rolled back data
-
     # 'P1.PD.DOBDay', 'P1.PD.DOBMonth', 'P1.PrevSpouseAge', 'P1.PD.Name.FamilyName',
     # 'P1.PD.Name.GivenName', 'P1.PD.PrevCOR.Row2.Other', 'P1.MS.SecA.FamilyName',
-    # 'P1.MS.SecA.GivenName', 'P2.MS.SecA.PrevSpouseDOB.DOBMonth', 
+    # 'P1.MS.SecA.GivenName', 'P2.MS.SecA.PrevSpouseDOB.DOBMonth',
     # 'P2.MS.SecA.PrevSpouseDOB.DOBDay', 'P2.MS.SecA.Psprt.PsprtNum.PsprtNum',
     # 'P2.natID.natIDdocs.DocNum.DocNum', 'P2.MS.SecA.Langs.languages.lov',
     # 'P3.Occ.OccRow1.Employer', 'P3.Occ.OccRow2.Employer', 'P3.Occ.OccRow3.Employer',
@@ -112,9 +117,9 @@ CANADA_5257E_DROP_COLUMNS = [
     # 'P3.Edu.Edu_Row1.ToMonth', 'P3.Edu.Edu_Row1.School', 'P3.Edu.Edu_Row1.CityTown',
     # 'P3.Edu.Edu_Row1.ProvState', 'P3.Occ.OccRow1.FromMonth', 'P3.Occ.OccRow1.ToMonth',
     # 'P3.Occ.OccRow1.CityTown.CityTown', 'P3.Occ.OccRow1.ProvState', 'P3.Occ.OccRow2.FromMonth',
-    # 'P3.Occ.OccRow2.ToMonth', 'P3.Occ.OccRow2.CityTown.CityTown', 'P3.Occ.OccRow2.ProvState', 
+    # 'P3.Occ.OccRow2.ToMonth', 'P3.Occ.OccRow2.CityTown.CityTown', 'P3.Occ.OccRow2.ProvState',
     # 'P3.Occ.OccRow3.FromMonth', 'P3.Occ.OccRow3.ToMonth', 'P3.Occ.OccRow3.CityTown.CityTown',
-    # 'P3.Occ.OccRow3.ProvState', 'P3.DOV.cntcts_Row1.AddrInCanada.AddrInCanada', 
+    # 'P3.Occ.OccRow3.ProvState', 'P3.DOV.cntcts_Row1.AddrInCanada.AddrInCanada',
     # 'P2.CI.cntct.FaxEmail.Email', 'P2.CI.cntct.AddrRow1.POBox.POBox',
     # 'P2.CI.cntct.AddrRow1.Apt.AptUnit', 'P2.CI.cntct.AddrRow1.StreetNum.StreetNum',
     # 'P2.CI.cntct.AddrRow1.Streetname.Streetname', 'P2.CI.cntct.AddrRow2.ProvinceState.ProvinceState',
@@ -140,21 +145,32 @@ CANADA_5257E_DROP_COLUMNS = [
     # 'P2.USCard.usCarddocs.ExpiryDate', 'P2.USCard.usCarddocs.DocNum.DocNum',
     # 'P2.MS.SecA.DateLastValidated.DateCalc', 'P2.MS.SecA.DateLastValidated.Day',
     # 'P2.MS.SecA.DateLastValidated.Year', 'P2.MS.SecA.DateLastValidated.Month',
-
-    'ns0:datasets.@xmlns:ns0', 'P1.Header.CRCNum', 'P1.FormVersion',
-    'P1.PD.UCIClientID', 'P1.PD.SecHeader.@ns0:dataNode',
-    'P1.PD.CurrCOR.Row1.@ns0:dataNode', 'P1.PD.PrevCOR.Row1.@ns0:dataNode',
-    'P1.PD.CWA.Row1.@ns0:dataNode', 'P1.PD.ApplicationValidatedFlag',
-    'P2.MS.SecA.SecHeader.@ns0:dataNode', 
-    'P2.MS.SecA.PsprtSecHeader.@ns0:dataNode',
-    'P2.MS.SecA.Langs.languagesHeader.@ns0:dataNode', 'P2.natID.SecHeader.@ns0:dataNode',
-    'P2.USCard.SecHeader.@ns0:dataNode', 'P2.USCard.SecHeader.@ns0:dataNode',
-    'P2.CI.cntct.cntctInfoSecHeader.@ns0:dataNode', 
-    'P3.SecHeader_DOV.@ns0:dataNode',
-    'P3.Edu.Edu_SecHeader.@ns0:dataNode',
-    'P3.Occ.SecHeader_CurrOcc.@ns0:dataNode', 'P3.BGI_SecHeader.@ns0:dataNode',
-    'P3.Sign.Consent0.Choice', 'P3.Sign.hand.@ns0:dataNode', 'P3.Sign.TextField2',
-    'P3.Disclosure.@ns0:dataNode', 'P3.ReaderInfo', 'Barcodes.@ns0:dataNode',
+    "ns0:datasets.@xmlns:ns0",
+    "P1.Header.CRCNum",
+    "P1.FormVersion",
+    "P1.PD.UCIClientID",
+    "P1.PD.SecHeader.@ns0:dataNode",
+    "P1.PD.CurrCOR.Row1.@ns0:dataNode",
+    "P1.PD.PrevCOR.Row1.@ns0:dataNode",
+    "P1.PD.CWA.Row1.@ns0:dataNode",
+    "P1.PD.ApplicationValidatedFlag",
+    "P2.MS.SecA.SecHeader.@ns0:dataNode",
+    "P2.MS.SecA.PsprtSecHeader.@ns0:dataNode",
+    "P2.MS.SecA.Langs.languagesHeader.@ns0:dataNode",
+    "P2.natID.SecHeader.@ns0:dataNode",
+    "P2.USCard.SecHeader.@ns0:dataNode",
+    "P2.USCard.SecHeader.@ns0:dataNode",
+    "P2.CI.cntct.cntctInfoSecHeader.@ns0:dataNode",
+    "P3.SecHeader_DOV.@ns0:dataNode",
+    "P3.Edu.Edu_SecHeader.@ns0:dataNode",
+    "P3.Occ.SecHeader_CurrOcc.@ns0:dataNode",
+    "P3.BGI_SecHeader.@ns0:dataNode",
+    "P3.Sign.Consent0.Choice",
+    "P3.Sign.hand.@ns0:dataNode",
+    "P3.Sign.TextField2",
+    "P3.Disclosure.@ns0:dataNode",
+    "P3.ReaderInfo",
+    "Barcodes.@ns0:dataNode",
 ]
 """List of columns to be dropped before doing any preprocessing
 
@@ -167,11 +183,17 @@ CANADA_5645E_DROP_COLUMNS = {
     # newly rolled back data
     # 'p1.SecA.App.AppDOB', 'p1.SecA.App.AppCOB', 'p1.SecA.App.AppOcc',
     # 'p1.SecA.Sps.ChdMStatus', 'p1.SecA.App.AppOcc',
-
-    'xfa:datasets.@xmlns:xfa', 'p1.SecA.Title.@xfa:dataNode', 'p1.SecB.SecBsignature',
-    'p1.SecB.SecBdate', 'p1.SecC.Title.@xfa:dataNode', 'p1.SecA.SecAsignature',
-    'p1.SecA.SecAdate', 'p1.SecB.Title.@xfa:dataNode', 'p1.SecC.SecCsignature',
-    'p1.SecC.Subform2.@xfa:dataNode',  'formNum',
+    "xfa:datasets.@xmlns:xfa",
+    "p1.SecA.Title.@xfa:dataNode",
+    "p1.SecB.SecBsignature",
+    "p1.SecB.SecBdate",
+    "p1.SecC.Title.@xfa:dataNode",
+    "p1.SecA.SecAsignature",
+    "p1.SecA.SecAdate",
+    "p1.SecB.Title.@xfa:dataNode",
+    "p1.SecC.SecCsignature",
+    "p1.SecC.Subform2.@xfa:dataNode",
+    "formNum",
 }
 """List of columns to be dropped before doing any preprocessing
 
@@ -185,22 +207,21 @@ Note:
 class DocTypes(Enum):
     """Contains all document types which can be used to customize ETL steps for each document type
 
-    Members follow the ``<country_name>_<document_type>`` naming convention. The value 
+    Members follow the ``<country_name>_<document_type>`` naming convention. The value
     and its order are meaningless.
     """
-    canada = 1        # referring to all Canada docs in general
+
+    canada = 1  # referring to all Canada docs in general
     canada_5257e = 2  # application for visitor visa (temporary resident visa)
     canada_5645e = 3  # Family information
     canada_label = 4  # containing labels
 
 
 class CanadaCutoffTerms(Enum):
-    """Dict of cut off terms for different files that is can be used with :func:`dict_summarizer <vizard.data.functional.dict_summarizer>`
+    """Dict of cut off terms for different files that is can be used with :func:`dict_summarizer <vizard.data.functional.dict_summarizer>`"""
 
-    """
-
-    ca5645e = 'IMM_5645'
-    ca5257e = 'form1'
+    ca5645e = "IMM_5645"
+    ca5257e = "form1"
 
 
 class CanadaFillna(Enum):
@@ -217,29 +238,29 @@ class CanadaFillna(Enum):
     """
 
     # 5257e
-    CountryCode_5257e = 'Unknown'
-    VisaType_5257e = 'OTHER'
-    PlaceBirthCity_5257e = 'OTHER'
-    Country_5257e = 'IRAN'
-    Citizenship_5257e = 'IRAN'
+    CountryCode_5257e = "Unknown"
+    VisaType_5257e = "OTHER"
+    PlaceBirthCity_5257e = "OTHER"
+    Country_5257e = "IRAN"
+    Citizenship_5257e = "IRAN"
     ResidencyStatus_5257e = 6
     OtherDescriptionIndicator_5257e = False
-    PreviousCountry_5257e = 'OTHER'
-    CountryWhereApplying_5257e = 'OTHER'
-    MarriageType_5257e = 'OTHER'
-    PassportCountry_5257e = 'OTHER'
-    NativeLang_5257e = 'IRAN'
-    LanguagesAbleToCommunicate_5257e = 'NEITHER'
-    IDCountry_5257e = 'IRAN'
+    PreviousCountry_5257e = "OTHER"
+    CountryWhereApplying_5257e = "OTHER"
+    MarriageType_5257e = "OTHER"
+    PassportCountry_5257e = "OTHER"
+    NativeLang_5257e = "IRAN"
+    LanguagesAbleToCommunicate_5257e = "NEITHER"
+    IDCountry_5257e = "IRAN"
     PurposeOfVisit_5257e = 7
-    ContactType_5257e = 'OTHER'
-    Occupation_5257e = 'OTHER'
+    ContactType_5257e = "OTHER"
+    Occupation_5257e = "OTHER"
     IndicatorField_5257e = False
 
     # 5645e
-    VisaApplicationType_5645e = '0'
+    VisaApplicationType_5645e = "0"
     ChildMarriageStatus_5645e = 9
-    ChildRelation_5645e = 'OTHER'
+    ChildRelation_5645e = "OTHER"
 
     # Visa result (manual file created by me :D)
     VisaResult = 0
@@ -273,7 +294,7 @@ class CustomNamingEnum(Enum):
         _name = super(CustomNamingEnum, self).name
         _name: str = _name.lower()
         # convert FOO_BAR to foo-bar (dataset convention)
-        _name = _name.replace('_', '-')
+        _name = _name.replace("_", "-")
         self._name_ = _name
         return self._name_
 
@@ -304,8 +325,7 @@ class CanadaMarriageStatus(CustomNamingEnum):
 
 
 class CanadaContactRelation(CustomNamingEnum):
-    """Contact relation in Canada data
-    """
+    """Contact relation in Canada data"""
 
     F1 = auto()
     F2 = auto()
@@ -316,8 +336,7 @@ class CanadaContactRelation(CustomNamingEnum):
 
 
 class CanadaResidencyStatus(CustomNamingEnum):
-    """Residency status in a country in Canada data
-    """
+    """Residency status in a country in Canada data"""
 
     CITIZEN = 1
     VISITOR = 3
@@ -325,8 +344,7 @@ class CanadaResidencyStatus(CustomNamingEnum):
 
 
 class Sex(CustomNamingEnum):
-    """Sex types in general
-    """
+    """Sex types in general"""
 
     FEMALE = auto()
     MALE = auto()
@@ -340,6 +358,6 @@ class Sex(CustomNamingEnum):
         return self._name_
 
 
-T0 = '19000202T000000'
+T0 = "19000202T000000"
 """a default meaningless time to fill the `None`s
 """

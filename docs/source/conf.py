@@ -12,17 +12,18 @@
 import datetime
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../..'))
+
+sys.path.insert(0, os.path.abspath("../.."))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-project = 'cvfe'
-copyright = f'{datetime.datetime.now().year}, Nikan Doosti'
-author = 'Nikan Doosti'
+project = "cvfe"
+copyright = f"{datetime.datetime.now().year}, Nikan Doosti"
+author = "Nikan Doosti"
 
 # The full version, including alpha/beta/rc tags
-version_file_path = '../../VERSION'
-with open(version_file_path, 'r') as version_file:
+version_file_path = "../../VERSION"
+with open(version_file_path, "r") as version_file:
     package_version = version_file.read().strip()
 release = package_version
 
@@ -30,37 +31,35 @@ release = package_version
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.napoleon',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    'sphinx.ext.autosummary',
-    'sphinx_autodoc_typehints',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.ifconfig',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages',
-    'sphinx.ext.autosectionlabel',
-    'sphinx_copybutton',
-    'myst_parser',
+    "sphinx.ext.napoleon",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.doctest",
+    "sphinx.ext.autosummary",
+    "sphinx_autodoc_typehints",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.todo",
+    "sphinx.ext.coverage",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.ifconfig",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.githubpages",
+    "sphinx.ext.autosectionlabel",
+    "sphinx_copybutton",
+    "myst_parser",
 ]
 
 napoleon_use_ivar = True
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = [
-    '_build'
-]
+exclude_patterns = ["_build"]
 
 autosummary_generate = True
 
@@ -69,12 +68,12 @@ autosummary_generate = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'furo'
+html_theme = "furo"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # Default options to an ..autoXXX directive.
 autodoc_default_options = {
@@ -89,19 +88,19 @@ autodoc_default_options = {
 autodoc_inherit_docstrings = True
 
 # sort docs based on source code
-autodoc_member_order = 'bysource'
+autodoc_member_order = "bysource"
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
-    'numpy': ('https://numpy.org/doc/stable', None),
-    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
-    'pypdf2': ('https://pypdf2.readthedocs.io/en/3.0.0/', None),
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
+    "pypdf2": ("https://pypdf2.readthedocs.io/en/3.0.0/", None),
 }
 
 # This value contains a list of modules to be mocked up
 autodoc_mock_imports = [
-    'typing',
-    'fastapi',
-    'xmltodict',
+    "typing",
+    "fastapi",
+    "xmltodict",
 ]
