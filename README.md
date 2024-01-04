@@ -79,7 +79,7 @@ From now on, the phrase "*if conda*" assumes if you are using `conda` for your p
 if conda:
 
 ```shell
-conda create --name cvfe python=3.11.0 -y
+conda create --name cvfe python=3.11 -y
 ```
 
 #### \[Optional\] 1.2.2 Activate the new environment
