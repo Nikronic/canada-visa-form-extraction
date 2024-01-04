@@ -170,3 +170,27 @@ Make sure you are in the root of the project, i.e. the same directory as the rep
 pip install -e .
 ```
 
+## 2 Developers
+
+These section is about developers who want to work on the source directly and includes things such as setting up tests, formatting and so on.
+
+### 2.1 Setting up `pre-commit`
+
+for formatting our repo correctly without needing to check every time, I suggest using pre-commit to hijack commit and using `black` and `isort` on them.
+
+```bash
+pip install pre-commit
+```
+
+be sure we have pre-commit configs at `.pre-commit-config.yaml` than use
+
+```bash
+pre-commit install
+```
+
+> [!TIP]
+> if we want to we could do a full check (pre-commit only checks new commits).
+>
+> ```bash
+> pre-commit run --all-files
+> ```
