@@ -174,7 +174,7 @@ class CanadaXFA(XFAPDF):
         Returns:
             str: cleaned XML content to be used in CSV file
         """
-        if type == DocTypes.canada_5257e:
+        if type == DocTypes.CANADA_5257E:
             # remove bad characters
             xml = re.sub(r"b'\\n", "", xml)
             xml = re.sub(r"'", "", xml)
@@ -191,7 +191,7 @@ class CanadaXFA(XFAPDF):
             xml = re.sub(r"'", "", xml)
             xml = re.sub(r"\\n[ ]*", "", xml)
 
-        elif type == DocTypes.canada_5645e:
+        elif type == DocTypes.CANADA_5645E:
             # remove bad characters
             xml = re.sub(r"b'\\n", "", xml)
             xml = re.sub(r"'", "", xml)

@@ -62,7 +62,7 @@ def process(src_dir: Path):
             df_preprocessor = CanadaDataframePreprocessor()
             if len(in_fname) != 0:
                 dataframe_applicant = df_preprocessor.file_specific_basic_transform(
-                    path=in_fname, type=DocTypes.canada_5257e
+                    path=in_fname, type=DocTypes.CANADA_5257E
                 )
             logger.info("↑↑↑ Finished processing 5257E ↑↑↑")
             # applicant family info
@@ -70,7 +70,7 @@ def process(src_dir: Path):
             in_fname = [f for f in files if "5645" in f][0]
             if len(in_fname) != 0:
                 dataframe_family = df_preprocessor.file_specific_basic_transform(
-                    path=in_fname, type=DocTypes.canada_5645e
+                    path=in_fname, type=DocTypes.CANADA_5645E
                 )
             logger.info("↑↑↑ Finished processing 5645E ↑↑↑")
 
