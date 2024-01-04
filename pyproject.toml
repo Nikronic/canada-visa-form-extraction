@@ -41,6 +41,7 @@ dynamic = ["version"]
 version = {file = "VERSION"}
 
 [project.optional-dependencies]
+format = ["pre-commit>=3.6.0"]
 test = ["httpx>=0.24.1", "pytest>=7.4.0"]
 doc = [
     "sphinx>=7.1.2",
@@ -56,6 +57,26 @@ include-package-data = true
 where = ["cvfe"]
 [tool.setuptools.package-data]
 mypkg = ["*.csv"]
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+[tool.isort]
+profile = "black"
+line_length = 88
+include_trailing_comma = true
 
 [project.urls]
 Homepage = "https://github.com/Nikronic/canada-visa-form-extraction"

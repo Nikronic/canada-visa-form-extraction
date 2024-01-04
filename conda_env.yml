@@ -28,20 +28,27 @@ dependencies:
       - annotated-types==0.6.0
       - anyio==4.2.0
       - certifi==2023.11.17
+      - cfgv==3.4.0
       - charset-normalizer==3.3.2
       - click==8.1.7
       - cvfe==0.2.12
       - deprecated==1.2.14
+      - distlib==0.3.8
       - fastapi==0.108.0
+      - filelock==3.13.1
       - gunicorn==21.2.0
       - h11==0.14.0
+      - identify==2.5.33
       - idna==3.6
       - lxml==5.0.0
+      - nodeenv==1.8.0
       - numpy==1.26.3
       - packaging==23.2
       - pandas==2.1.4
       - pikepdf==8.11.2
       - pillow==10.2.0
+      - platformdirs==4.1.0
+      - pre-commit==3.6.0
       - pydantic==2.5.3
       - pydantic-core==2.14.6
       - pydantic-settings==2.1.0
@@ -60,6 +67,7 @@ dependencies:
       - tzdata==2023.4
       - urllib3==2.1.0
       - uvicorn==0.25.0
+      - virtualenv==20.25.0
       - wrapt==1.16.0
       - xmltodict==0.13.0
 prefix: /home/nikan/miniforge3/envs/cvfe

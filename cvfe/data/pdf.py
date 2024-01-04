@@ -1,17 +1,14 @@
-__all__ = [
-    'PDFIO', 'XFAPDF', 'CanadaXFA'
-]
+__all__ = ["PDFIO", "XFAPDF", "CanadaXFA"]
 
-# core
-import xml.etree.ElementTree as et
-import pypdf
 import re
-# ours: data
-from cvfe.data import functional
-from cvfe.data.constant import DocTypes
-# helpers
+import xml.etree.ElementTree as et
 from enum import Enum
 from typing import Any
+
+import pypdf
+
+from cvfe.data import functional
+from cvfe.data.constant import DocTypes
 
 
 class PDFIO:
@@ -62,9 +59,7 @@ class PDFIO:
 
 
 class XFAPDF(PDFIO):
-    """Contains functions and utility tools for dealing with XFA PDF documents.
-
-    """
+    """Contains functions and utility tools for dealing with XFA PDF documents."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -84,11 +79,11 @@ class XFAPDF(PDFIO):
             str: XFA object of the pdf file in XML format
         """
 
-        pdf_object = open(pdf_path, 'rb')
+        pdf_object = open(pdf_path, "rb")
         pdf = pypdf.PdfReader(stream=pdf_object, strict=True)
-        xfa = self.find_in_dict('/XFA', pdf.resolved_objects)
+        xfa = self.find_in_dict("/XFA", pdf.resolved_objects)
         # `datasets` keyword contains filled forms in XFA array
-        xml = xfa[xfa.index('datasets')+1].get_object().get_data()
+        xml = xfa[xfa.index("datasets") + 1].get_object().get_data()
         xml = str(xml)  # convert bytes to str
         return xml
 
@@ -117,7 +112,7 @@ class XFAPDF(PDFIO):
 
         ref: https://stackoverflow.com/questions/38852822/how-to-flatten-xml-file-in-python
         args:
-            d: A dictionary  
+            d: A dictionary
             return: An ordered dict
         """
 
@@ -163,9 +158,7 @@ class XFAPDF(PDFIO):
 
 
 class CanadaXFA(XFAPDF):
-    """Handles Canada XFA PDF files
-
-    """
+    """Handles Canada XFA PDF files"""
 
     def __init__(self) -> None:
         super().__init__()
@@ -183,26 +176,25 @@ class CanadaXFA(XFAPDF):
         """
         if type == DocTypes.canada_5257e:
             # remove bad characters
-            xml = re.sub(r"b'\\n", '', xml)
-            xml = re.sub(r"'", '', xml)
-            xml = re.sub(r"\\n", '', xml)
+            xml = re.sub(r"b'\\n", "", xml)
+            xml = re.sub(r"'", "", xml)
+            xml = re.sub(r"\\n", "", xml)
 
             # remove 9000 lines of redundant info for '5257e' doc
             tree = et.ElementTree(et.fromstring(xml))
             root = tree.getroot()
-            junk = tree.findall('LOVFile')
+            junk = tree.findall("LOVFile")
             root.remove(junk[0])
-            xml = str(et.tostring(root, encoding='utf8', method='xml'))
+            xml = str(et.tostring(root, encoding="utf8", method="xml"))
             # parsing through ElementTree adds bad characters too
-            xml = re.sub(
-                r"b'<\?xml version=\\'1.0\\' encoding=\\'utf8\\'\?>", '', xml)
-            xml = re.sub(r"'", '', xml)
-            xml = re.sub(r"\\n[ ]*", '', xml)
+            xml = re.sub(r"b'<\?xml version=\\'1.0\\' encoding=\\'utf8\\'\?>", "", xml)
+            xml = re.sub(r"'", "", xml)
+            xml = re.sub(r"\\n[ ]*", "", xml)
 
         elif type == DocTypes.canada_5645e:
             # remove bad characters
-            xml = re.sub(r"b'\\n", '', xml)
-            xml = re.sub(r"'", '', xml)
-            xml = re.sub(r"\\n", '', xml)
+            xml = re.sub(r"b'\\n", "", xml)
+            xml = re.sub(r"'", "", xml)
+            xml = re.sub(r"\\n", "", xml)
 
         return xml
