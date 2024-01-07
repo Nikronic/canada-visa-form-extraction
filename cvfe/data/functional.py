@@ -1,7 +1,7 @@
 __all__ = [
     "dict_summarizer",
     "dict_to_csv",
-    "column_dropper",
+    "key_dropper",
     "fillna_datetime",
     "aggregate_datetime",
     "tag_to_regex_compatible",
@@ -22,11 +22,10 @@ import datetime
 import logging
 import os
 import re
+from copy import deepcopy
 from fnmatch import fnmatch
 from typing import Any, Callable, Iterable, Optional, cast
 
-import numpy as np
-import pandas as pd
 import xmltodict
 from dateutil import parser
 
@@ -142,74 +141,75 @@ def dict_to_csv(data_dict: dict[str, Any], path: str) -> None:
         w.writerow(data_dict)
 
 
-def column_dropper(
-    dataframe: pd.DataFrame,
+def key_dropper(
+    data_dict: dict[str, Any],
     string: str,
     exclude: Optional[str] = None,
     regex: bool = False,
     inplace: bool = True,
-) -> Optional[pd.DataFrame]:
-    """Takes a Pandas Dataframe and drops columns matching a pattern
+) -> Optional[dict[str, Any]]:
+    """Takes a dictionary and drops keys matching a pattern
 
     Args:
-        dataframe (:class:`pandas.DataFrame`): Pandas dataframe to be processed
-        string (str): string to look for in ``dataframe`` columns
-        exclude (Optional[str], optional): string to exclude a subset of columns from
+        data_dict (dict[str, Any]): Dictionary to be processed
+        string (str): string to look for in ``data_dict`` keys
+        exclude (Optional[str], optional): string to exclude a subset of keys from
             being dropped. Defaults to None.
         regex (bool, optional): compile ``string`` as regex. Defaults to False.
         inplace (bool, optional): whether or not use and inplace
             operation. Defaults to True.
 
     Returns:
-        Optional[:class:`pandas.DataFrame`]:
-            Takes a Pandas Dataframe and searches for
-            columns *containing* ``string`` in them either raw string or
-            regex (in latter case, use ``regex=True``) and after ``exclude`` ing a
-            subset of them, drops the remaining *in-place*.
+        Optional[dict[str, Any]]:
+            Takes a dictionary and searches for keys *containing* ``string``
+            in them either raw string or regex (in latter case, use ``regex=True``)
+            and after ``exclude`` ing a subset of them, drops the remaining *in-place*.
     """
 
     if regex:
         r = re.compile(string)
-        col_to_drop = list(filter(r.match, dataframe.columns.values))
+        key_to_drop = list(filter(r.match, list(data_dict.keys())))
     else:
-        col_to_drop = [col for col in dataframe.columns.values if string in col]
+        key_to_drop = [key for key in list(data_dict.keys()) if string in key]
 
     if exclude is not None:
-        col_to_drop = [col for col in col_to_drop if exclude not in col]
+        key_to_drop = [key for key in key_to_drop if exclude not in key]
 
     if inplace:
-        dataframe.drop(col_to_drop, axis=1, inplace=inplace)
+        drop(dictionary=data_dict, keys=key_to_drop)
     else:
-        dataframe = dataframe.drop(col_to_drop, axis=1, inplace=inplace)
+        data_dict_copy = deepcopy(data_dict)
+        drop(dictionary=data_dict_copy, keys=key_to_drop)
 
-    return None if inplace else dataframe
+    return None if inplace else data_dict_copy
 
 
 def fillna_datetime(
-    dataframe: pd.DataFrame,
-    col_base_name: str,
+    data_dict: dict[str, Any],
+    key_base_name: str,
     date: str,
-    type: DocTypes,
+    doc_type: DocTypes,
     one_sided: str | bool = False,
     inplace: bool = False,
-) -> Optional[pd.DataFrame]:
-    """Takes names of two columns of dates (start, end) and fills them with a predefined value
+) -> Optional[dict[str, Any]]:
+    """Takes names of two keys with dates value (start, end) and fills them with a predefined value
 
     Args:
-        dataframe (:class:`pandas.DataFrame`): Pandas Dataframe to be processed
-        col_base_name (str): Base column name that accepts ``'From'`` and ``'To'`` for
+        data_dict (dict[str, Any]): A dictionary to be processed
+        key_base_name (str): Base key name that accepts ``'From'`` and ``'To'`` for
             extracting dates of same category
         date (str): The desired date
-        type (DocTypes): Different ways of filling empty date columns:
+        doc_type (DocTypes): :class:`DocTypes <cvfe.data.constant.DocTypes>`
+            used to use rules for matching tags and filling appropriately.
+            Defaults to False.
+
+        one_sided (str | bool, optional): Different ways of filling empty date keys:
 
             1. ``'right'``: Uses the ``current_date`` as the final time
             2. ``'left'``: Uses the ``reference_date`` as the starting time
 
-        one_sided (str | bool, optional): whether or not use an inplace
+        inplace (bool, optional): whether or not use an inplace
             operation. Defaults to False.
-        inplace (bool, optional): :class:`DocTypes <cvfe.data.constant.DocTypes>`
-            used to use rules for matching tags and filling appropriately.
-            Defaults to False.
 
     Note:
         In transformation operations such as :func:`aggregate_datetime` function,
@@ -217,53 +217,55 @@ def fillna_datetime(
         non existing items (e.g. age of children for single person).
 
     Returns:
-        :class:`pandas.DataFrame`:
-            A Pandas Dataframe that two columns of dates that had no value (None)
-            which was filled to the same date via ``date``.
+        dict[str, Any]:
+            A dictionary that two keys with dates types that had no value (None)
+            which was filled to the exact same date via ``date``.
     """
 
     if not one_sided:
-        r = re.compile(tag_to_regex_compatible(string=col_base_name, type=type))
+        r = re.compile(tag_to_regex_compatible(string=key_base_name, doc_type=doc_type))
     else:
         r = re.compile(
-            tag_to_regex_compatible(string=col_base_name, type=type) + "\.(From|To).+"
+            tag_to_regex_compatible(string=key_base_name, doc_type=doc_type)
+            + "\.(From|To).+"
         )
-    columns_to_fillna_names = list(filter(r.match, dataframe.columns.values))
-    for col in dataframe[columns_to_fillna_names]:
+    keys_to_fillna_names = list(filter(r.match, list(data_dict.keys())))
+    for key in data_dict[keys_to_fillna_names]:
         if inplace:
-            dataframe[col].fillna(date, inplace=inplace)
+            data_dict[key] = fillna(original=data_dict[key], new=date)
         else:
-            dataframe[col] = dataframe[col].fillna(date, inplace=inplace)
-    return None if inplace else dataframe
+            data_dict_copy = deepcopy(data_dict_copy)
+            data_dict_copy[key] = fillna(original=data_dict_copy[key], new=date)
+    return None if inplace else data_dict
 
 
 def aggregate_datetime(
-    dataframe: pd.DataFrame,
-    col_base_name: str,
-    new_col_name: str,
-    type: DocTypes,
-    if_nan: Optional[str | Callable] = "skip",
+    data_dict: dict[str, Any],
+    key_base_name: str,
+    new_key_name: str,
+    doc_type: DocTypes,
+    if_nan: str | Callable = "skip",
     one_sided: Optional[str] = None,
     reference_date: Optional[str] = None,
     current_date: Optional[str] = None,
     **kwargs,
-) -> pd.DataFrame:
-    """Takes two columns of dates in string form and calculates the period of them
+) -> dict[str, Any]:
+    """Takes two keys of dates in string form and calculates the period of them
 
     Args:
-        dataframe (:class:`pandas.DataFrame`): Pandas dataframe to be processed
-        col_base_name (str): Base column name that accepts ``'From'`` and ``'To'`` for
+        data_dict (dict[str, Any]): A dictionary to be processed
+        key_base_name (str): Base key name that accepts ``'From'`` and ``'To'`` for
             extracting dates of same category
-        new_col_name (str): The column name that extends ``col_base_name`` and will be
-            the final column containing the period.
-        type (DocTypes): document type used to use rules for matching tags and
+        new_key_name (str): The key name that extends ``key_base_name`` and will be
+            the final key containing the period.
+        doc_type (DocTypes): document type used to use rules for matching tags and
             filling appropriately. See :class:`DocTypes <cvfe.data.constant.DocTypes>`.
-        if_nan (Optional[str | Callable], optional): What to do with None s (NaN).
+        if_nan (str | Callable, optional): What to do with None s (NaN).
             Could be a function or predefined states as follow:
 
             1. ``'skip'``: do nothing (i.e. ignore ``None``s). Defaults to ``'skip'``.
 
-        one_sided (Optional[str], optional): Different ways of filling empty date columns.
+        one_sided (Optional[str], optional): Different ways of filling empty date keys.
             Defaults to None. Could be one of the following:
 
             1. ``'right'``: Uses the ``current_date`` as the final time
@@ -275,9 +277,10 @@ def aggregate_datetime(
             for dateutil.parser.parse_.
 
     Returns:
-        :class:`pandas.DataFrame`:
-            A Pandas Dataframe calculate the period of two columns of dates
-            and represent it in integer form. The two columns used will be dropped.
+        dict[str, Any]:
+            A new dictionary that contains a key with result of calculation of the period
+            of two keys with values of dates and represent it in integer form.
+            The two keys used for this are dropped.
 
     .. _datetime.datetime: https://docs.python.org/3/library/datetime.html
     .. _dateutil.parser.parse: https://dateutil.readthedocs.io/en/stable/parser.html
@@ -290,87 +293,81 @@ def aggregate_datetime(
     )
     default_datetime = kwargs.get("default_datetime", default_datetime)
 
-    aggregated_column_name = None
+    aggregated_key_name = None
     if one_sided is None:
-        aggregated_column_name = col_base_name + "." + new_col_name
+        aggregated_key_name = key_base_name + "." + new_key_name
         r = re.compile(
-            tag_to_regex_compatible(string=col_base_name, type=type) + "\.(From|To).+"
+            tag_to_regex_compatible(string=key_base_name, doc_type=doc_type)
+            + "\.(From|To).+"
         )
     else:  # when one_sided, we no longer have *From* or *To*
-        aggregated_column_name = col_base_name + "." + new_col_name
-        r = re.compile(tag_to_regex_compatible(string=col_base_name, type=type))
-    columns_to_aggregate_names = list(filter(r.match, dataframe.columns.values))
+        aggregated_key_name = key_base_name + "." + new_key_name
+        r = re.compile(tag_to_regex_compatible(string=key_base_name, doc_type=doc_type))
+    keys_to_aggregate_names = list(filter(r.match, list(data_dict.keys())))
 
     # *.FromDate and *.ToDate --> *.Period
-    column_from_date = reference_date
-    column_to_date = current_date
+    key_from_date = reference_date
+    key_to_date = current_date
     if one_sided == "left":
-        column_from_date = reference_date
-        to_date = columns_to_aggregate_names[0]
+        key_from_date = reference_date
+        to_date = keys_to_aggregate_names[0]
     elif one_sided == "right":
-        column_to_date = current_date
-        from_date = columns_to_aggregate_names[0]
+        key_to_date = current_date
+        from_date = keys_to_aggregate_names[0]
     else:
-        from_date = [col for col in columns_to_aggregate_names if "From" in col][0]
-        to_date = [col for col in columns_to_aggregate_names if "To" in col][0]
+        from_date = [col for col in keys_to_aggregate_names if "From" in col][0]
+        to_date = [col for col in keys_to_aggregate_names if "To" in col][0]
 
-    if isinstance(column_to_date, str):
-        column_to_date = parser.parse(
-            column_to_date, default=default_datetime
-        )  # type: ignore
+    if isinstance(key_to_date, str):
+        key_to_date = parser.parse(key_to_date, default=default_datetime)
 
-    if column_from_date is None:  # ignore reference_date if from_date exists
-        # to able to use already parsed data from fillna
-        if not dataframe[from_date].dtypes == "<M8[ns]":
-            dataframe[from_date] = dataframe[from_date].apply(
-                lambda x: parser.parse(x, default=default_datetime)
-                if x is not None
-                else x
+    if key_from_date is None:
+        # ignore reference_date if from_date exists
+        #   to able to use already parsed data from fillna
+        if not isinstance(data_dict[from_date], datetime.datetime):
+            data_dict[from_date] = (
+                parser.parse(data_dict[from_date], default=default_datetime)
+                if data_dict[from_date] is not None
+                else data_dict[from_date]
             )
-        column_from_date = dataframe[from_date]
+        key_from_date = data_dict[from_date]
     else:
-        if isinstance(column_from_date, str):
-            column_from_date = parser.parse(
-                column_from_date, default=default_datetime
-            )  # type: ignore
+        if isinstance(key_from_date, str):
+            key_from_date = parser.parse(key_from_date, default=default_datetime)
 
-    if column_to_date is None:  # ignore current_date if to_date exists
-        # to able to use already parsed data from fillna
-        if not dataframe[to_date].dtypes == "<M8[ns]":
-            dataframe[to_date] = dataframe[to_date].apply(
-                lambda x: parser.parse(x, default=default_datetime)
-                if x is not None
-                else x
+    if key_to_date is None:
+        # ignore current_date if to_date exists
+        #   to able to use already parsed data from fillna
+        if not isinstance(data_dict[to_date], datetime.datetime):
+            data_dict[to_date] = (
+                parser.parse(data_dict[to_date], default=default_datetime)
+                if data_dict[to_date] is not None
+                else data_dict[to_date]
             )
-        column_to_date = dataframe[to_date]
+
+        key_to_date = data_dict[to_date]
     else:
-        if isinstance(column_to_date, str):
-            column_to_date = parser.parse(
-                column_to_date, default=default_datetime
-            )  # type: ignore
+        if isinstance(key_to_date, str):
+            key_to_date = parser.parse(key_to_date, default=default_datetime)
 
     if if_nan is not None:
         if if_nan == "skip":
-            if column_from_date.isna().all() or column_to_date.isna().all():  # type: ignore
-                return dataframe
+            if key_from_date is None or key_to_date is None:
+                return data_dict
 
-    dataframe[aggregated_column_name] = np.nan  # combination of dates
-    dataframe[aggregated_column_name].fillna(  # period
-        column_to_date - column_from_date, inplace=True
-    )  # type: ignore
-    dataframe[aggregated_column_name] = dataframe[
-        aggregated_column_name
-    ].dt.days.astype(
-        "int32"
-    )  # change to int of days
+    data_dict[aggregated_key_name] = None  # combination of dates
+    data_dict[aggregated_key_name] = fillna(
+        original=data_dict[aggregated_key_name], new=(key_to_date - key_from_date).days
+    )
 
-    dataframe.drop(
-        columns_to_aggregate_names, axis=1, inplace=True
-    )  # drop from/to columns
-    return dataframe
+    assert isinstance(data_dict[aggregated_key_name], int)  # days must be int
+
+    # drop start and end date keys
+    drop(dictionary=data_dict, keys=keys_to_aggregate_names)
+    return data_dict
 
 
-def tag_to_regex_compatible(string: str, type: DocTypes) -> str:
+def tag_to_regex_compatible(string: str, doc_type: DocTypes) -> str:
     """Takes a string and makes it regex compatible for XML parsed string
 
     Note:
@@ -379,7 +376,7 @@ def tag_to_regex_compatible(string: str, type: DocTypes) -> str:
 
     Args:
         string (str): input string to get manipulated
-        type (DocTypes): specified :class:`DocTypes <cvfe.data.constant.DocTypes>`
+        doc_type (DocTypes): specified :class:`DocTypes <cvfe.data.constant.DocTypes>`
             to determine regex rules
 
     Returns:
@@ -387,9 +384,9 @@ def tag_to_regex_compatible(string: str, type: DocTypes) -> str:
     """
 
     if (
-        type == DocTypes.CANADA_5257E
-        or type == DocTypes.CANADA_5645E
-        or type == DocTypes.CANADA
+        doc_type == DocTypes.CANADA_5257E
+        or doc_type == DocTypes.CANADA_5645E
+        or doc_type == DocTypes.CANADA
     ):
         string = string.replace(".", "\.").replace("[", "\[").replace("]", "\]")
 
@@ -397,18 +394,18 @@ def tag_to_regex_compatible(string: str, type: DocTypes) -> str:
 
 
 def change_dtype(
-    dataframe: pd.DataFrame,
-    col_name: str,
+    data_dict: dict[str, Any],
+    key_name: str,
     dtype: Callable,
     if_nan: str | Callable = "skip",
     **kwargs,
-) -> pd.DataFrame:
-    """Changes the data type of a column with ability to fill ``None`` s
+) -> dict[str, Any]:
+    """Changes the data type of a key with ability to fill ``None`` s (fillna)
 
     Args:
-        dataframe (:class:`pandas.DataFrame`): Dataframe that ``column_name`` will be searched on
-        col_name (str): Desired column name of the dataframe
-        dtype (Callable): target data type as a function e.g. ``np.float32``
+        data_dict (dict[str, Any]): A dictionary that ``key_name`` will be searched on
+        key_name (str): Desired key name of the dictionary
+        dtype (Callable): target data type as a function e.g. ``float``
         if_nan (str, Callable, optional): What to do with None s (NaN).
             Defaults to ``'skip'``. Could be a function or predefined states as follow:
 
@@ -423,9 +420,10 @@ def change_dtype(
             raise if ``if_nan`` is ``Callable``.
 
     Returns:
-        :class:`pandas.DataFrame`:
-            A Pandas Dataframe calculate the period of two columns of dates
-            and represent it in integer form. The two columns used will be dropped.
+        dict[str, Any]:
+            A dictionary that contains the calculation of the period of two keys with
+            values of type dates and represent it in number of days. The two keys used
+            for the calculation of period are dropped.
     """
 
     default_datetime = datetime.datetime(
@@ -472,6 +470,7 @@ def change_dtype(
             try:
                 parser.parse(value)
             except ValueError:  # bad input format for `parser.parse`
+                value = cast(str, value)
                 # we want YYYY-MM-DD
                 # MMDDYYYY format (Canada Common Forms)
                 if len(value) == 8 and value.isnumeric():
@@ -500,12 +499,14 @@ def change_dtype(
         return dtype(x)
 
     # apply the rules and data type change
-    dataframe[col_name] = dataframe[col_name].apply(
-        lambda x: apply_dtype(standardize(x)) if x is not None else func(x)
+    data_dict[key_name] = data_dict[key_name]
+    data_dict[key_name] = (
+        apply_dtype(standardize(data_dict[key_name]))
+        if data_dict[key_name] is not None
+        else func(data_dict[key_name])
     )
 
-    return dataframe
-
+    return data_dict
 
 
 def flatten_dict(dictionary: dict[str, Any]) -> dict[str, Any]:
@@ -640,4 +641,3 @@ def extended_dict_get(
             )
         )
         return string
-
