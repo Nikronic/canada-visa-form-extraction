@@ -23,7 +23,7 @@ import logging
 import os
 import re
 from fnmatch import fnmatch
-from typing import Any, Callable, Optional, cast
+from typing import Any, Callable, Iterable, Optional, cast
 
 import numpy as np
 import pandas as pd
@@ -36,6 +36,19 @@ from cvfe.data.preprocessor import FileTransformCompose
 # set logger
 logger = logging.getLogger(__name__)
 
+
+def drop(dictionary: dict[str, Any], keys: Iterable[str]) -> None:
+    """Takes a dictionary and removes ``keys`` from it
+
+    Args:
+        dictionary (dict[str, Any]): The dictionary to be processed
+        keys (Iterable[str]): An iterable of string as subset of keys.
+            If an item in ``keys`` is none existent in the dictionary,
+            it will just skip it.
+    """
+
+    for k in keys:
+        dictionary.pop(k, None)
 
 def dict_summarizer(
     d: dict,
