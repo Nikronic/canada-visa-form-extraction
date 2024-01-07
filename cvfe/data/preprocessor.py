@@ -64,49 +64,6 @@ class DataframePreprocessor:
             inplace=inplace,
         )
 
-    def fillna_datetime(
-        self,
-        col_base_name: str,
-        type: DocTypes,
-        one_sided: str | bool,
-        date: Optional[str] = None,
-        inplace: bool = False,
-    ) -> Optional[pd.DataFrame]:
-        """See :func:`cvfe.data.functional.fillna_datetime` for more details"""
-        if date is None:
-            date = T0
-
-        return functional.fillna_datetime(
-            dataframe=self.dataframe,
-            col_base_name=col_base_name,
-            one_sided=one_sided,
-            date=date,
-            inplace=inplace,
-            type=type,
-        )
-
-    def aggregate_datetime(
-        self,
-        col_base_name: str,
-        new_col_name: str,
-        type: DocTypes,
-        if_nan: Optional[str | Callable] = None,
-        one_sided: Optional[str] = None,
-        reference_date: Optional[str] = None,
-        current_date: Optional[str] = None,
-    ) -> pd.DataFrame:
-        """See :func:`cvfe.data.functional.aggregate_datetime` for more details"""
-        return functional.aggregate_datetime(
-            dataframe=self.dataframe,
-            col_base_name=col_base_name,
-            new_col_name=new_col_name,
-            one_sided=one_sided,
-            if_nan=if_nan,
-            type=type,
-            reference_date=reference_date,
-            current_date=current_date,
-        )
-
     def file_specific_basic_transform(self, type: DocTypes, path: str) -> pd.DataFrame:
         """
         Takes a specific file then does data type fixing, missing value filling, discretization, etc.
