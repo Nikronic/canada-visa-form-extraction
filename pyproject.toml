@@ -21,10 +21,10 @@ classifiers = [
 requires-python = ">=3.10.6"
 dependencies = [
     "pip>=23.1.2",
-    "pandas>=1.5.3",
     "xmltodict>=0.13.0",
     "pikepdf>=8.2.1",
     "pypdf>=3.17.0",
+    "python-dateutil>=2.8.1",
     "pydantic>=2.0.3",
     "fastapi>=0.100.0",
     "gunicorn>=21.2.0",

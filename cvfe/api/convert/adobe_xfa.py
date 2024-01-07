@@ -2,10 +2,9 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import fastapi
-import pandas as pd
 import requests
 from fastapi.encoders import jsonable_encoder
 
@@ -13,7 +12,7 @@ from cvfe.api.convert import BASE_SOURCE_DIR
 from cvfe.data import functional
 from cvfe.data.constant import DocTypes
 from cvfe.data.preprocessor import (
-    CanadaDataframePreprocessor,
+    CanadaDataDictPreprocessor,
     CopyFile,
     FileTransformCompose,
     MakeContentCopyProtectedMachineReadable,
@@ -48,9 +47,9 @@ def process(src_dir: Path):
     logger.info("↑↑↑ Finished data extraction ↑↑↑")
 
     logger.info("↓↓↓ Starting data loading ↓↓↓")
-    # convert PDFs to pandas dataframes
+    # convert PDFs to dictionaries
     src_dir = dst_dir.as_posix()
-    dataframe = pd.DataFrame()
+    data_dict = {}
     for dirpath, dirnames, all_filenames in os.walk(src_dir):
         # filter all_filenames
         filenames = all_filenames
@@ -59,31 +58,30 @@ def process(src_dir: Path):
             # applicant form
             logger.info("↓↓↓ Starting to process 5257E ↓↓↓")
             in_fname = [f for f in files if "5257" in f][0]
-            df_preprocessor = CanadaDataframePreprocessor()
+            data_dict_preprocessor = CanadaDataDictPreprocessor()
             if len(in_fname) != 0:
-                dataframe_applicant = df_preprocessor.file_specific_basic_transform(
-                    path=in_fname, type=DocTypes.CANADA_5257E
+                data_dict_applicant = (
+                    data_dict_preprocessor.file_specific_basic_transform(
+                        path=in_fname, doc_type=DocTypes.CANADA_5257E
+                    )
                 )
             logger.info("↑↑↑ Finished processing 5257E ↑↑↑")
             # applicant family info
             logger.info("↓↓↓ Starting to process 5645E ↓↓↓")
             in_fname = [f for f in files if "5645" in f][0]
             if len(in_fname) != 0:
-                dataframe_family = df_preprocessor.file_specific_basic_transform(
-                    path=in_fname, type=DocTypes.CANADA_5645E
+                data_dict_family = data_dict_preprocessor.file_specific_basic_transform(
+                    path=in_fname, doc_type=DocTypes.CANADA_5645E
                 )
             logger.info("↑↑↑ Finished processing 5645E ↑↑↑")
 
-            # final dataframe: concatenate common forms and label column wise
-            dataframe = pd.concat(
-                objs=[dataframe_applicant, dataframe_family],
-                axis=1,
-                verify_integrity=True,
-            )
+            # final dictionary: concatenate 5257 and 5645 dicts
+            data_dict.update(data_dict_applicant)
+            data_dict.update(data_dict_family)
         # logging
         logger.info(f"Processed the data point")
     logger.info("↑↑↑ Finished data loading ↑↑↑")
-    return dataframe
+    return data_dict
 
 
 @router.post("/", status_code=fastapi.status.HTTP_200_OK, tags=["adobe_xfa"])
@@ -110,10 +108,10 @@ async def convert(
             status_code=fastapi.status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=str(e)
         )
     try:
-        data: pd.DataFrame = process(src_dir=BASE_SOURCE_DIR)
+        data_dict: dict[str, Any] = process(src_dir=BASE_SOURCE_DIR)
 
         logger.info("Process finished")
-        response = [data.iloc[0].to_dict()]
+        response = [data_dict]
 
     except Exception as error:
         logger.exception(error)

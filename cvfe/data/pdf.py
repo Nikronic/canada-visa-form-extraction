@@ -141,7 +141,7 @@ class XFAPDF(PDFIO):
         Returns:
             dict: A flattened dictionary
         """
-        return functional.flatten_dict(d=d)
+        return functional.flatten_dict(dictionary=d)
 
     def xml_to_flattened_dict(self, xml: str) -> dict:
         """Takes a (nested) XML and converts it to a flattened dictionary
