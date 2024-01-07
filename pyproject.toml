@@ -21,7 +21,6 @@ classifiers = [
 requires-python = ">=3.10.6"
 dependencies = [
     "pip>=23.1.2",
-    "pandas>=1.5.3",
     "xmltodict>=0.13.0",
     "pikepdf>=8.2.1",
     "pypdf>=3.17.0",
