@@ -66,15 +66,15 @@ def fillna(original: Any, new: Any) -> Any:
 
 
 def dict_summarizer(
-    d: dict,
+    data_dict: dict[str, Any],
     cutoff_term: str,
     KEY_ABBREVIATION_DICT: dict = None,
     VALUE_ABBREVIATION_DICT: dict = None,
-) -> dict:
+) -> dict[str, Any]:
     """Takes a flattened dictionary and shortens its keys
 
     Args:
-        d (dict): The dictionary to be shortened
+        data_dict (dict[str, Any]): The dictionary to be shortened
         cutoff_term (str): The string that used to find in keys and remove anything behind it
         KEY_ABBREVIATION_DICT (dict, optional): A dictionary containing abbreviation
             mapping for keys. Defaults to None.
@@ -82,14 +82,14 @@ def dict_summarizer(
             mapping for values. Defaults to None.
 
     Returns:
-        dict:
+        dict[str, Any]:
             A dict with shortened keys by throwing away some part and using a
             abbreviation dictionary for both keys and values.
     """
 
     new_keys = {}
     new_values = {}
-    for k, v in d.items():
+    for k, v in data_dict.items():
         if KEY_ABBREVIATION_DICT is not None:
             new_k = k
             if cutoff_term in k:  # FIXME: cutoff part should be outside of abbreviation
@@ -120,24 +120,26 @@ def dict_summarizer(
 
     # return a new dictionary with updated values
     if KEY_ABBREVIATION_DICT is None:
-        new_keys = dict((key, key) for (key, _) in d.items())
+        new_keys = dict((key, key) for (key, _) in data_dict.items())
     if VALUE_ABBREVIATION_DICT is None:
-        new_values = dict((value, value) for (_, value) in d.items())
-    return dict((new_keys[key], new_values[value]) for (key, value) in d.items())
+        new_values = dict((value, value) for (_, value) in data_dict.items())
+    return dict(
+        (new_keys[key], new_values[value]) for (key, value) in data_dict.items()
+    )
 
 
-def dict_to_csv(d: dict, path: str) -> None:
+def dict_to_csv(data_dict: dict[str, Any], path: str) -> None:
     """Takes a flattened dictionary and writes it to a CSV file.
 
     Args:
-        d (dict): A dictionary
+        data_dict (dict[str, Any]): A dictionary to be saved
         path (str): Path to the output file (will be created if not exist)
     """
 
     with open(path, "w") as f:
-        w = csv.DictWriter(f, d.keys())
+        w = csv.DictWriter(f, data_dict.keys())
         w.writeheader()
-        w.writerow(d)
+        w.writerow(data_dict)
 
 
 def column_dropper(
@@ -506,19 +508,17 @@ def change_dtype(
 
 
 
-
-
-def flatten_dict(d: dict) -> dict:
+def flatten_dict(dictionary: dict[str, Any]) -> dict[str, Any]:
     """Takes a (nested) multilevel dictionary and flattens it
 
     Args:
-        d (dict): A dictionary (could be multilevel)
+        dictionary (dict[str, Any]): A dictionary (could be multilevel)
 
     References:
         1. https://stackoverflow.com/a/67744709/18971263
 
     Returns:
-        dict: Flattened dictionary where keys and values of returned dict are:
+        dict[str, Any]: Flattened dictionary where keys and values of returned dict are:
 
             * ``new_keys[i] = f'{old_leys[level]}.{old_leys[level+1]}.[...].{old_leys[level+n]}'``
             * ``new_value = old_value``
@@ -526,8 +526,8 @@ def flatten_dict(d: dict) -> dict:
     """
 
     def items():
-        if isinstance(d, dict):
-            for key, value in d.items():
+        if isinstance(dictionary, dict):
+            for key, value in dictionary.items():
                 # nested subtree
                 if isinstance(value, dict):
                     for subkey, subvalue in flatten_dict(value).items():
@@ -640,5 +640,4 @@ def extended_dict_get(
             )
         )
         return string
-
 
