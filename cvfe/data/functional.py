@@ -50,6 +50,21 @@ def drop(dictionary: dict[str, Any], keys: Iterable[str]) -> None:
     for k in keys:
         dictionary.pop(k, None)
 
+
+def fillna(original: Any, new: Any) -> Any:
+    """Replaces an ``original`` value with a ``new`` if None
+
+    Args:
+        original (Any): Original value to be replaced if None
+        new (Any): The new value as replacement of ``original``
+
+    Returns:
+        Any: The new value
+    """
+
+    return new if original is None else original
+
+
 def dict_summarizer(
     d: dict,
     cutoff_term: str,
