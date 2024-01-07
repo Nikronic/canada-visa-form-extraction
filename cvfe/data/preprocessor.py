@@ -106,10 +106,9 @@ class DataframePreprocessor:
             path (str): string path to config file
         """
 
-        config_df = pd.read_csv(path)
-        return dict(
-            zip(config_df[config_df.columns[0]], config_df[config_df.columns[1]])
-        )
+        with open(path, newline="") as f:
+            config_dict = csv.DictReader(f, delimiter=",")
+        return config_dict
 
 
 class CanadaDataframePreprocessor(DataframePreprocessor):
