@@ -29,10 +29,10 @@ jobs:
         run: |
           if [[ ${{ github.event.pull_request.base.ref }} == "main" && ${{ github.event.pull_request.head.ref }} =~ ^release-v.*$ ]]; then
             echo "PR is from a release branch to main."
-            echo "::set-output name=trigger_deploy::true"
+            echo "trigger_deploy=true" >> $GITHUB_OUTPUT
           else
             echo "PR is not from a release branch to main."
-            echo "::set-output name=trigger_deploy::false"
+            echo "trigger_deploy=false" >> $GITHUB_OUTPUT
           fi
       - name: Set up Python
         uses: actions/setup-python@v4
