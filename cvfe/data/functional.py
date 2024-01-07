@@ -6,14 +6,9 @@ __all__ = [
     "aggregate_datetime",
     "tag_to_regex_compatible",
     "change_dtype",
-    "unit_converter",
     "flatten_dict",
     "xml_to_flattened_dict",
-    "create_directory_structure_tree",
-    "dump_directory_structure_csv",
     "process_directory",
-    "search_dict",
-    "config_csv_to_dict",
 ]
 
 """
@@ -482,59 +477,7 @@ def change_dtype(
     return dataframe
 
 
-def dump_directory_structure_csv(src: str, shallow: bool = True) -> None:
-    """Saves a tree structure of a directory in csv file
 
-    Takes a ``src`` directory path, creates a tree of dir structure and writes
-    it down to a csv file with name ``'label.csv'`` with
-    default value of ``'0'`` for each path
-
-    Note:
-        This has been used to manually extract and record labels.
-
-    Args:
-        src (str): Source directory path
-        shallow (bool, optional): If only dive one level of depth (False: recursive).
-            Defaults to True.
-    """
-
-    dic = create_directory_structure_tree(src=src, shallow=shallow)
-    flat_dic = flatten_dict(dic)
-    flat_dic = {k: v for k, v in flat_dic.items() if v is not None}
-    dict_to_csv(d=flat_dic, path=src + "/label.csv")
-
-
-def create_directory_structure_tree(src: str, shallow: bool = False) -> dict:
-    """Takes a path to directory and creates a dictionary of its directory structure tree
-
-    Args:
-        src (str): Path to source directory
-        shallow (bool, optional): Whether or not just dive to root dir's subdir.
-            Defaults to False.
-
-    References:
-        1. https://stackoverflow.com/a/25226267/18971263
-
-    Returns:
-        dict:
-            Dictionary of all dirs (and subdirs) where keys are path
-            and values are ``0``
-    """
-    d = {
-        "name": os.path.basename(src) if os.path.isdir(src) else None
-    }  # ignore files, only dir
-    if os.path.isdir(src):
-        if shallow:
-            d["children"] = [{x: "0"} for x in os.listdir(src)]  # type: ignore
-        else:  # recursively walk into all dirs and subdirs
-            d["children"] = [
-                create_directory_structure_tree(os.path.join(src, x))  # type: ignore
-                for x in os.listdir(src)
-            ]
-    else:
-        pass
-        # d['type'] = "file"
-    return d
 
 
 def flatten_dict(d: dict) -> dict:
@@ -632,28 +575,6 @@ def process_directory(
         logger.info(f"Processed the data entry.")
 
 
-def search_dict(string: str, dic: dict, if_nan: str) -> str:
-    """Converts a string to another given a dictionary to search for
-
-    Note:
-        This could be used to convert non-standard country codes to their names
-
-    Args:
-        string (str): input string
-        dic (dict): dictionary to be searched for ``string`` in its keys
-        if_nan (str): if ``string`` could not be found in ``dic``, return ``if_nan``
-
-    Returns:
-        str: Converted string
-    """
-    country = [c for c in dic.keys() if string in c]
-    if country:
-        return dic[country[0]]
-    else:
-        logger.debug(f'"{string}" key could not be found, filled with "{if_nan}".')
-        return if_nan
-
-
 def extended_dict_get(
     string: str, dic: dict, if_nan: str, condition: Optional[Callable | bool] = None
 ):
@@ -693,50 +614,3 @@ def extended_dict_get(
         return string
 
 
-def fix_typo(string: str, typos: list | dict, fix: Optional[str] = None) -> str:
-    """Fixes a typo in a token/word given a list of typos or dictionary of typos
-
-    Args:
-        string (str): the string that is a typo
-        typos (list | dict): two cases:
-
-            * list: a list that all are typos and will be replaced by ``fix``
-            * dict: a dictionary that keys are typos and values are corresponding fixes
-
-        fix (Optional[str], optional): a single token/work string to replace typo.
-            Its value will be ignored if ``typos`` is ``dict``. Defaults to None.
-
-    Raises:
-        TypeError: When ``typos`` is ``list``, then ``fix`` must be provided
-        TypeError: If ``typos`` is not ``list`` nor ``dict``
-
-    Returns:
-        str: fixed typo
-    """
-    if isinstance(typos, list) and (fix is None):
-        raise TypeError("`fix` cannot be `None` when `typos` is `list`.")
-
-    if isinstance(typos, list):
-        fix = cast(str, fix)
-        return fix if string in typos else string
-    elif isinstance(typos, dict):
-        return typos[string] if string in typos.keys() else string
-    else:
-        raise TypeError(f'type "{type(typos)}" is not recognized.')
-
-
-def config_csv_to_dict(path: str) -> dict:
-    """Takes a config CSV and return a dictionary of key and values
-
-    Note:
-        Configs of our use case can be found in :py:mod:`cvfe.configs`
-
-    Args:
-        path (str): string path to config file
-
-    Returns:
-        dict: A dictionary of converted csv
-    """
-
-    config_df = pd.read_csv(path)
-    return dict(zip(config_df[config_df.columns[0]], config_df[config_df.columns[1]]))
