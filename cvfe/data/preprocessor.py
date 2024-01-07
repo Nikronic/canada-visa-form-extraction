@@ -1,18 +1,17 @@
 __all__ = [
-    "DataframePreprocessor",
-    "CanadaDataframePreprocessor",
+    "DataDictPreprocessor",
+    "CanadaDataDictPreprocessor",
     "FileTransformCompose",
     "FileTransform",
     "CopyFile",
     "MakeContentCopyProtectedMachineReadable",
 ]
 
+import csv
 import logging
 import shutil
 from typing import Any, Callable, Optional
 
-import numpy as np
-import pandas as pd
 import pikepdf
 from dateutil import parser
 from dateutil.relativedelta import *
@@ -26,45 +25,47 @@ from cvfe.data.pdf import CanadaXFA
 logger = logging.getLogger(__name__)
 
 
-class DataframePreprocessor:
-    """A wrapper around builtin Pandas functions to make it easier for our data values
+class DataDictPreprocessor:
+    """A set of utilities over dictionary of data to make it easier for data preprocessing
 
-    A class that contains methods for dealing with dataframes regarding
-    transformation of data such as filling missing values, dropping columns,
-    or aggregating multiple columns into a single more meaningful one.
+    A class that contains methods for dealing with dictionaries regarding
+    transformation of data such as filling missing values, dropping keys,
+    or aggregating multiple keys into a single more meaningful one.
 
     This class needs to be extended for file specific preprocessing where tags are
     unique and need to be done entirely manually.
     In this case, :func:`file_specific_basic_transform` needs to be implemented.
     """
 
-    def __init__(self, dataframe: pd.DataFrame = None) -> None:
+    def __init__(self, data_dict: Optional[dict[str, Any]] = None) -> None:
         """
 
         Args:
-            dataframe (:class:`pandas.DataFrame`, optional): Main dataframe to be preprocessed.
-                Defaults to None.
+            data_dict (Optional[dict[str, Any]], optional): Main dictionary of data to
+                be preprocessed. Defaults to None.
         """
-        self.dataframe = dataframe
+        self.data_dict = data_dict
 
-    def column_dropper(
+    def key_dropper(
         self,
         string: str,
         exclude: Optional[str] = None,
         regex: bool = False,
         inplace: bool = True,
-    ) -> Optional[pd.DataFrame]:
-        """See :func:`cvfe.data.functional.column_dropper` for more information"""
+    ) -> Optional[dict[str, Any]]:
+        """See :func:`cvfe.data.functional.key_dropper` for more information"""
 
-        return functional.column_dropper(
-            dataframe=self.dataframe,
+        return functional.key_dropper(
+            data_dict=self.data_dict,
             string=string,
             exclude=exclude,
             regex=regex,
             inplace=inplace,
         )
 
-    def file_specific_basic_transform(self, type: DocTypes, path: str) -> pd.DataFrame:
+    def file_specific_basic_transform(
+        self, doc_type: DocTypes, path: str
+    ) -> dict[str, Any]:
         """
         Takes a specific file then does data type fixing, missing value filling, discretization, etc.
 
@@ -75,7 +76,8 @@ class DataframePreprocessor:
             to other problems or even files.
 
         Args:
-            type (DocTypes): The input document type (see :class:`DocTypes <cvfe.data.constant.DocTypes>`)
+            doc_type (DocTypes): The input document type
+                (see :class:`DocTypes <cvfe.data.constant.DocTypes>`)
             path (str): Path to the input document
         """
 
@@ -83,7 +85,7 @@ class DataframePreprocessor:
 
     def change_dtype(
         self,
-        col_name: str,
+        key_name: str,
         dtype: Callable,
         if_nan: str | Callable = "skip",
         **kwargs,
@@ -91,8 +93,8 @@ class DataframePreprocessor:
         """See :func:`cvfe.data.functional.change_dtype` for more details"""
 
         return functional.change_dtype(
-            dataframe=self.dataframe,
-            col_name=col_name,
+            data_dict=self.data_dict,
+            key_name=key_name,
             dtype=dtype,
             if_nan=if_nan,
             **kwargs,
@@ -111,9 +113,9 @@ class DataframePreprocessor:
         return config_dict
 
 
-class CanadaDataframePreprocessor(DataframePreprocessor):
-    def __init__(self, dataframe: Optional[pd.DataFrame] = None) -> None:
-        super().__init__(dataframe)
+class CanadaDataDictPreprocessor(DataDictPreprocessor):
+    def __init__(self, data_dict: Optional[dict[str, Any]] = None) -> None:
+        super().__init__(data_dict)
         self.base_date = (
             None  # the time forms were filled, considered "today" for forms
         )
@@ -142,10 +144,12 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
             )
             return CanadaFillna.COUNTRY_CODE_5257E
 
-    def file_specific_basic_transform(self, type: DocTypes, path: str) -> pd.DataFrame:
+    def file_specific_basic_transform(
+        self, doc_type: DocTypes, path: str
+    ) -> dict[str, Any]:
         canada_xfa = CanadaXFA()  # Canada PDF to XML
 
-        if type == DocTypes.CANADA_5257E:
+        if doc_type == DocTypes.CANADA_5257E:
             # XFA to XML
             xml = canada_xfa.extract_raw_content(path)
             xml = canada_xfa.clean_xml_for_csv(xml=xml, type=DocTypes.CANADA_5257E)
@@ -159,436 +163,409 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 KEY_ABBREVIATION_DICT=CANADA_5257E_KEY_ABBREVIATION,
                 VALUE_ABBREVIATION_DICT=CANADA_5257E_VALUE_ABBREVIATION,
             )
-            # convert each data dict to a dataframe
-            dataframe = pd.DataFrame.from_dict(data=[data_dict], orient="columns")
-            self.dataframe = dataframe
-            # drop pepeg columns
-            #   warning: setting `errors='ignore` ignores errors if columns do not exist!
-            dataframe.drop(
-                CANADA_5257E_DROP_COLUMNS, axis=1, inplace=True, errors="ignore"
-            )
+
+            self.data_dict = data_dict
+
+            # drop pepeg keys
+            functional.drop(dictionary=data_dict, keys=CANADA_5257E_DROP_COLUMNS)
 
             # Adult binary state: adult=True or child=False
-            dataframe["P1.AdultFlag"] = dataframe["P1.AdultFlag"].apply(
-                lambda x: True if x == "adult" else False
-            )
+            feature = "P1.AdultFlag"
+            data_dict[feature] = True if data_dict[feature] == "adult" else False
+
             # service language: 1=En, 2=Fr -> need to be changed to categorical
-            dataframe = self.change_dtype(
-                col_name="P1.PD.ServiceIn.ServiceIn", dtype=np.int8, if_nan="skip"
-            )
+            feature = "P1.PD.ServiceIn.ServiceIn"
+            data_dict = self.change_dtype(key_name=feature, dtype=int, if_nan="skip")
+
             # AliasNameIndicator: 1=True, 0=False
-            dataframe[
-                "P1.PD.AliasName.AliasNameIndicator.AliasNameIndicator"
-            ] = dataframe[
-                "P1.PD.AliasName.AliasNameIndicator.AliasNameIndicator"
-            ].apply(
-                lambda x: True if x == "Y" else False
-            )
+            feature = "P1.PD.AliasName.AliasNameIndicator.AliasNameIndicator"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
+
             # VisaType: String -> categorical
-            dataframe = self.change_dtype(
-                col_name="P1.PD.VisaType.VisaType",
+            data_dict = self.change_dtype(
+                key_name="P1.PD.VisaType.VisaType",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.VISA_TYPE_5257E,
             )
             # Birth City: String -> categorical
-            dataframe = self.change_dtype(
-                col_name="P1.PD.PlaceBirthCity",
+            data_dict = self.change_dtype(
+                key_name="P1.PD.PlaceBirthCity",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.PLACE_BIRTH_CITY_5257E,
             )
             # Birth country: string -> categorical
-            dataframe = self.change_dtype(
-                col_name="P1.PD.PlaceBirthCountry",
+            data_dict = self.change_dtype(
+                key_name="P1.PD.PlaceBirthCountry",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.COUNTRY_5257E,
             )
             # citizen of: string -> categorical
-            dataframe = self.change_dtype(
-                col_name="P1.PD.Citizenship.Citizenship",
+            data_dict = self.change_dtype(
+                key_name="P1.PD.Citizenship.Citizenship",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.CITIZENSHIP_5257E,
             )
             # current country of residency: string -> categorical
-            dataframe = self.change_dtype(
-                col_name="P1.PD.CurrCOR.Row2.Country",
+            data_dict = self.change_dtype(
+                key_name="P1.PD.CurrCOR.Row2.Country",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.COUNTRY_5257E,
             )
             # current country of residency status: string -> categorical
-            dataframe = self.change_dtype(
-                col_name="P1.PD.CurrCOR.Row2.Status",
-                dtype=np.int8,
+            data_dict = self.change_dtype(
+                key_name="P1.PD.CurrCOR.Row2.Status",
+                dtype=int,
                 if_nan="fill",
-                value=np.int8(CanadaFillna.RESIDENCY_STATUS_5257E),
+                value=int(CanadaFillna.RESIDENCY_STATUS_5257E),
             )
             # current country of residency other description: bool -> categorical
-            dataframe = self.change_dtype(
-                col_name="P1.PD.CurrCOR.Row2.Other",
+            data_dict = self.change_dtype(
+                key_name="P1.PD.CurrCOR.Row2.Other",
                 dtype=bool,
                 if_nan="fill",
                 value=CanadaFillna.OTHER_DESCRIPTION_INDICATOR_5257E,
             )
             # validation date of information, i.e. current date: datetime
-            dataframe = self.change_dtype(
-                col_name="P3.Sign.C1CertificateIssueDate",
+            data_dict = self.change_dtype(
+                key_name="P3.Sign.C1CertificateIssueDate",
                 dtype=parser.parse,
                 if_nan="skip",
             )
             # keep it so we can access for other file if that was None
-            if not dataframe["P3.Sign.C1CertificateIssueDate"].isna().all():
-                self.base_date = dataframe["P3.Sign.C1CertificateIssueDate"]
+            feature = "P3.Sign.C1CertificateIssueDate"
+            if data_dict[feature] is not None:
+                self.base_date = data_dict[feature]
             # date of birth in year: string -> datetime
-            dataframe = self.change_dtype(
-                col_name="P1.PD.DOBYear", dtype=parser.parse, if_nan="skip"
+            data_dict = self.change_dtype(
+                key_name="P1.PD.DOBYear", dtype=parser.parse, if_nan="skip"
             )
             # current country of residency period: None -> Datetime (=age period)
-            dataframe = self.change_dtype(
-                col_name="P1.PD.CurrCOR.Row2.FromDate",
+            data_dict = self.change_dtype(
+                key_name="P1.PD.CurrCOR.Row2.FromDate",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["P1.PD.DOBYear"],
+                value=data_dict["P1.PD.DOBYear"],
             )
-            dataframe = self.change_dtype(
-                col_name="P1.PD.CurrCOR.Row2.ToDate",
+            data_dict = self.change_dtype(
+                key_name="P1.PD.CurrCOR.Row2.ToDate",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                value=data_dict["P3.Sign.C1CertificateIssueDate"],
             )
             # has previous country of residency: bool -> categorical
-            dataframe["P1.PD.PCRIndicator"] = dataframe["P1.PD.PCRIndicator"].apply(
-                lambda x: True if x == "Y" else False
-            )
-
+            feature = "P1.PD.PCRIndicator"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
             # clean previous country of residency features
             country_tag_list = [
-                c for c in dataframe.columns.values if "P1.PD.PrevCOR." in c
+                c for c in list(data_dict.keys()) if "P1.PD.PrevCOR." in c
             ]
             PREV_COUNTRY_MAX_FEATURES = 4
             for i in range(len(country_tag_list) // PREV_COUNTRY_MAX_FEATURES):
                 # in XLA extracted file, this section start from `Row2` (ie. i+2)
                 i += 2
                 # previous country of residency 02: string -> categorical
-                dataframe = self.change_dtype(
-                    col_name="P1.PD.PrevCOR.Row" + str(i) + ".Country",
+                data_dict = self.change_dtype(
+                    key_name="P1.PD.PrevCOR.Row" + str(i) + ".Country",
                     dtype=str,
                     if_nan="fill",
                     value=CanadaFillna.PREVIOUS_COUNTRY_5257E,
                 )
                 # previous country of residency status 02: string -> categorical
-                dataframe = self.change_dtype(
-                    col_name="P1.PD.PrevCOR.Row" + str(i) + ".Status",
-                    dtype=np.int8,
+                data_dict = self.change_dtype(
+                    key_name="P1.PD.PrevCOR.Row" + str(i) + ".Status",
+                    dtype=int,
                     if_nan="fill",
-                    value=np.int8(CanadaFillna.RESIDENCY_STATUS_5257E),
+                    value=int(CanadaFillna.RESIDENCY_STATUS_5257E),
                 )
                 # previous country of residency 02 period (P1.PD.PrevCOR.Row2): string -> datetime -> int days
-                dataframe = self.change_dtype(
-                    col_name="P1.PD.PrevCOR.Row" + str(i) + ".FromDate",
+                data_dict = self.change_dtype(
+                    key_name="P1.PD.PrevCOR.Row" + str(i) + ".FromDate",
                     dtype=parser.parse,
                     if_nan="fill",
-                    value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                    value=data_dict["P3.Sign.C1CertificateIssueDate"],
                 )
-                dataframe = self.change_dtype(
-                    col_name="P1.PD.PrevCOR.Row" + str(i) + ".ToDate",
+                data_dict = self.change_dtype(
+                    key_name="P1.PD.PrevCOR.Row" + str(i) + ".ToDate",
                     dtype=parser.parse,
                     if_nan="fill",
-                    value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                    value=data_dict["P3.Sign.C1CertificateIssueDate"],
                 )
             # apply from country of residency (cwa=country where apply): Y=True, N=False
-            dataframe["P1.PD.SameAsCORIndicator"] = dataframe[
-                "P1.PD.SameAsCORIndicator"
-            ].apply(lambda x: True if x == "Y" else False)
+            feature = "P1.PD.SameAsCORIndicator"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
             # country where applying: string -> categorical
-            dataframe = self.change_dtype(
-                col_name="P1.PD.CWA.Row2.Country",
+            data_dict = self.change_dtype(
+                key_name="P1.PD.CWA.Row2.Country",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.COUNTRY_WHERE_APPLYING_5257E,
             )
             # country where applying status: string -> categorical
-            dataframe = self.change_dtype(
-                col_name="P1.PD.CWA.Row2.Status",
-                dtype=np.int8,
+            data_dict = self.change_dtype(
+                key_name="P1.PD.CWA.Row2.Status",
+                dtype=int,
                 if_nan="fill",
-                value=np.int8(CanadaFillna.RESIDENCY_STATUS_5257E),
+                value=int(CanadaFillna.RESIDENCY_STATUS_5257E),
             )
             # country where applying other: string -> categorical
-            dataframe = self.change_dtype(
-                col_name="P1.PD.CWA.Row2.Other",
+            data_dict = self.change_dtype(
+                key_name="P1.PD.CWA.Row2.Other",
                 dtype=bool,
                 if_nan="fill",
                 value=CanadaFillna.OTHER_DESCRIPTION_INDICATOR_5257E,
             )
             # country where applying period: datetime -> int days
-            dataframe = self.change_dtype(
-                col_name="P1.PD.CWA.Row2.FromDate",
+            data_dict = self.change_dtype(
+                key_name="P1.PD.CWA.Row2.FromDate",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                value=data_dict["P3.Sign.C1CertificateIssueDate"],
             )
-            dataframe = self.change_dtype(
-                col_name="P1.PD.CWA.Row2.ToDate",
+            data_dict = self.change_dtype(
+                key_name="P1.PD.CWA.Row2.ToDate",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                value=data_dict["P3.Sign.C1CertificateIssueDate"],
             )
             # marriage period: datetime -> int days
-            dataframe = self.change_dtype(
-                col_name="P1.MS.SecA.DateOfMarr",
+            data_dict = self.change_dtype(
+                key_name="P1.MS.SecA.DateOfMarr",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                value=data_dict["P3.Sign.C1CertificateIssueDate"],
             )
             # previous marriage: Y=True, N=False
-            dataframe["P2.MS.SecA.PrevMarrIndicator"] = dataframe[
-                "P2.MS.SecA.PrevMarrIndicator"
-            ].apply(lambda x: True if x == "Y" else False)
+            feature = "P2.MS.SecA.PrevMarrIndicator"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
             # previous marriage type of relationship
-            dataframe = self.change_dtype(
-                col_name="P2.MS.SecA.TypeOfRelationship",
+            data_dict = self.change_dtype(
+                key_name="P2.MS.SecA.TypeOfRelationship",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.MARRIAGE_TYPE_5257E,
             )
             # previous spouse age period: string -> datetime -> int days
-            dataframe = self.change_dtype(
-                col_name="P2.MS.SecA.PrevSpouseDOB.DOBYear",
+            data_dict = self.change_dtype(
+                key_name="P2.MS.SecA.PrevSpouseDOB.DOBYear",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                value=data_dict["P3.Sign.C1CertificateIssueDate"],
             )
             # previous marriage period: string -> datetime -> int days
-            dataframe = self.change_dtype(
-                col_name="P2.MS.SecA.FromDate",
+            data_dict = self.change_dtype(
+                key_name="P2.MS.SecA.FromDate",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                value=data_dict["P3.Sign.C1CertificateIssueDate"],
             )
-            dataframe = self.change_dtype(
-                col_name="P2.MS.SecA.ToDate.ToDate",
+            data_dict = self.change_dtype(
+                key_name="P2.MS.SecA.ToDate.ToDate",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                value=data_dict["P3.Sign.C1CertificateIssueDate"],
             )
             # passport country of issue: string -> categorical
-            dataframe = self.change_dtype(
-                col_name="P2.MS.SecA.Psprt.CountryofIssue.CountryofIssue",
+            data_dict = self.change_dtype(
+                key_name="P2.MS.SecA.Psprt.CountryofIssue.CountryofIssue",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.PASSPORT_COUNTRY_5257E,
             )
             # expiry remaining period: datetime -> int days
             # if None, fill with 1 year ago, ie. period=1year
-            temp_date = dataframe["P3.Sign.C1CertificateIssueDate"].apply(
-                lambda x: x + relativedelta(years=-1)
-            )
-            dataframe = self.change_dtype(
-                col_name="P2.MS.SecA.Psprt.ExpiryDate",
+            feature = "P3.Sign.C1CertificateIssueDate"
+            temp_date = data_dict[feature] + relativedelta(years=-1)
+            data_dict = self.change_dtype(
+                key_name="P2.MS.SecA.Psprt.ExpiryDate",
                 dtype=parser.parse,
                 if_nan="fill",
                 value=temp_date,
             )
             # native lang: string -> categorical
-            dataframe = self.change_dtype(
-                col_name="P2.MS.SecA.Langs.languages.nativeLang.nativeLang",
+            data_dict = self.change_dtype(
+                key_name="P2.MS.SecA.Langs.languages.nativeLang.nativeLang",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.NATIVE_LANG_5257E,
             )
             # communication lang: Eng, Fr, both, none -> categorical
-            dataframe = self.change_dtype(
-                col_name="P2.MS.SecA.Langs.languages.ableToCommunicate.ableToCommunicate",
+            data_dict = self.change_dtype(
+                key_name="P2.MS.SecA.Langs.languages.ableToCommunicate.ableToCommunicate",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.LANGUAGES_ABLE_TO_COMMUNICATE_5257E,
             )
             # language official test: bool -> binary
-            dataframe["P2.MS.SecA.Langs.LangTest"] = dataframe[
-                "P2.MS.SecA.Langs.LangTest"
-            ].apply(lambda x: True if x == "Y" else False)
+            feature = "P2.MS.SecA.Langs.LangTest"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
             # have national ID: bool -> binary
-            dataframe["P2.natID.q1.natIDIndicator"] = dataframe[
-                "P2.natID.q1.natIDIndicator"
-            ].apply(lambda x: True if x == "Y" else False)
+            feature = "P2.natID.q1.natIDIndicator"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
             # national ID country of issue: string -> categorical
-            dataframe = self.change_dtype(
-                col_name="P2.natID.natIDdocs.CountryofIssue.CountryofIssue",
+            data_dict = self.change_dtype(
+                key_name="P2.natID.natIDdocs.CountryofIssue.CountryofIssue",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.ID_COUNTRY_5257E,
             )
             # United States doc: bool -> binary
-            dataframe["P2.USCard.q1.usCardIndicator"] = dataframe[
-                "P2.USCard.q1.usCardIndicator"
-            ].apply(lambda x: True if x == "Y" else False)
+            feature = "P2.USCard.q1.usCardIndicator"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
             # US Canada phone number: bool -> binary
-            dataframe["P2.CI.cntct.PhnNums.Phn.CanadaUS"] = dataframe[
-                "P2.CI.cntct.PhnNums.Phn.CanadaUS"
-            ].apply(lambda x: True if x == "1" else False)
+            feature = "P2.CI.cntct.PhnNums.Phn.CanadaUS"
+            data_dict[feature] = True if data_dict[feature] == "1" else False
             # US Canada alt phone number: bool -> binary
-            dataframe["P2.CI.cntct.PhnNums.AltPhn.CanadaUS"] = dataframe[
-                "P2.CI.cntct.PhnNums.AltPhn.CanadaUS"
-            ].apply(lambda x: True if x == "1" else False)
+            feature = "P2.CI.cntct.PhnNums.AltPhn.CanadaUS"
+            data_dict[feature] = True if data_dict[feature] == "1" else False
             # purpose of visit: string, 8 states -> categorical
-            dataframe = self.change_dtype(
-                col_name="P3.DOV.PrpsRow1.PrpsOfVisit.PrpsOfVisit",
-                dtype=np.int8,
+            data_dict = self.change_dtype(
+                key_name="P3.DOV.PrpsRow1.PrpsOfVisit.PrpsOfVisit",
+                dtype=int,
                 if_nan="fill",
-                value=np.int8(CanadaFillna.PURPOSE_OF_VISIT_5257E),
+                value=int(CanadaFillna.PURPOSE_OF_VISIT_5257E),
             )  # 7 is other in the form
             # purpose of visit description: string -> binary
-            dataframe = self.change_dtype(
-                col_name="P3.DOV.PrpsRow1.Other.Other",
+            data_dict = self.change_dtype(
+                key_name="P3.DOV.PrpsRow1.Other.Other",
                 dtype=bool,
                 if_nan="fill",
                 value=CanadaFillna.OTHER_DESCRIPTION_INDICATOR_5257E,
             )
             # how long going to stay: None -> datetime (0 days)
-            dataframe = self.change_dtype(
-                col_name="P3.DOV.PrpsRow1.HLS.FromDate",
+            data_dict = self.change_dtype(
+                key_name="P3.DOV.PrpsRow1.HLS.FromDate",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                value=data_dict["P3.Sign.C1CertificateIssueDate"],
             )
-            dataframe = self.change_dtype(
-                col_name="P3.DOV.PrpsRow1.HLS.ToDate",
+            data_dict = self.change_dtype(
+                key_name="P3.DOV.PrpsRow1.HLS.ToDate",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                value=data_dict["P3.Sign.C1CertificateIssueDate"],
             )
             # fund to integer
-            dataframe = self.change_dtype(
-                col_name="P3.DOV.PrpsRow1.Funds.Funds", dtype=np.int32, if_nan="skip"
+            data_dict = self.change_dtype(
+                key_name="P3.DOV.PrpsRow1.Funds.Funds", dtype=int, if_nan="skip"
             )
             # relation to applicant of purpose of visit 01: string -> categorical
-            dataframe = self.change_dtype(
-                col_name="P3.DOV.cntcts_Row1.RelationshipToMe.RelationshipToMe",
+            data_dict = self.change_dtype(
+                key_name="P3.DOV.cntcts_Row1.RelationshipToMe.RelationshipToMe",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.CONTACT_TYPE_5257E,
             )
             # relation to applicant of purpose of visit 02: string -> categorical
-            dataframe = self.change_dtype(
-                col_name="P3.cntcts_Row2.Relationship.RelationshipToMe",
+            data_dict = self.change_dtype(
+                key_name="P3.cntcts_Row2.Relationship.RelationshipToMe",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.CONTACT_TYPE_5257E,
             )
             # higher education: bool -> binary
-            dataframe["P3.Edu.EduIndicator"] = dataframe["P3.Edu.EduIndicator"].apply(
-                lambda x: True if x == "Y" else False
-            )
+            feature = "P3.Edu.EduIndicator"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
             # higher education period: string -> datetime -> int days
-            dataframe = self.change_dtype(
-                col_name="P3.Edu.Edu_Row1.FromYear",
+            data_dict = self.change_dtype(
+                key_name="P3.Edu.Edu_Row1.FromYear",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                value=data_dict["P3.Sign.C1CertificateIssueDate"],
             )
-            dataframe = self.change_dtype(
-                col_name="P3.Edu.Edu_Row1.ToYear",
+            data_dict = self.change_dtype(
+                key_name="P3.Edu.Edu_Row1.ToYear",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                value=data_dict["P3.Sign.C1CertificateIssueDate"],
             )
             # higher education country: string -> categorical
-            dataframe = self.change_dtype(
-                col_name="P3.Edu.Edu_Row1.Country.Country",
+            data_dict = self.change_dtype(
+                key_name="P3.Edu.Edu_Row1.Country.Country",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.COUNTRY_5257E,
             )
             # field of study: string -> categorical
-            dataframe["P3.Edu.Edu_Row1.FieldOfStudy"] = dataframe[
-                "P3.Edu.Edu_Row1.FieldOfStudy"
-            ].astype("string")
+            feature = "P3.Edu.Edu_Row1.FieldOfStudy"
+            data_dict[feature] = str(data_dict[feature])
             # clean occupation features
-            occupation_tag_list = [
-                c for c in dataframe.columns.values if "P3.Occ.OccRow" in c
-            ]
+            feature = "P3.Occ.OccRow"
+            occupation_tag_list = [c for c in list(data_dict.keys()) if feature in c]
             PREV_OCCUPATION_MAX_FEATURES = 9
             for i in range(len(occupation_tag_list) // PREV_OCCUPATION_MAX_FEATURES):
                 i += 1  # in the form, it starts from Row1 (ie. i+1)
                 # occupation period 01: none -> string year -> int days
-                dataframe = self.change_dtype(
-                    col_name="P3.Occ.OccRow" + str(i) + ".FromYear",
+                data_dict = self.change_dtype(
+                    key_name="P3.Occ.OccRow" + str(i) + ".FromYear",
                     dtype=parser.parse,
                     if_nan="fill",
-                    value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                    value=data_dict["P3.Sign.C1CertificateIssueDate"],
                 )
-                dataframe = self.change_dtype(
-                    col_name="P3.Occ.OccRow" + str(i) + ".ToYear",
+                data_dict = self.change_dtype(
+                    key_name="P3.Occ.OccRow" + str(i) + ".ToYear",
                     dtype=parser.parse,
                     if_nan="fill",
-                    value=dataframe["P3.Sign.C1CertificateIssueDate"],
+                    value=data_dict["P3.Sign.C1CertificateIssueDate"],
                 )
 
                 # occupation type 01: string -> categorical
-                dataframe = self.change_dtype(
-                    col_name="P3.Occ.OccRow" + str(i) + ".Occ.Occ",
+                data_dict = self.change_dtype(
+                    key_name="P3.Occ.OccRow" + str(i) + ".Occ.Occ",
                     dtype=str,
                     if_nan="fill",
                     value=CanadaFillna.OCCUPATION_5257E,
                 )
                 # occupation country: string -> categorical
-                dataframe = self.change_dtype(
-                    col_name="P3.Occ.OccRow" + str(i) + ".Country.Country",
+                data_dict = self.change_dtype(
+                    key_name="P3.Occ.OccRow" + str(i) + ".Country.Country",
                     dtype=str,
                     if_nan="fill",
                     value=CanadaFillna.COUNTRY_5257E,
                 )
 
             # medical details: string -> binary
-            dataframe = self.change_dtype(
-                col_name="P3.BGI.Details.MedicalDetails",
+            data_dict = self.change_dtype(
+                key_name="P3.BGI.Details.MedicalDetails",
                 dtype=bool,
                 if_nan="fill",
                 value=CanadaFillna.INDICATOR_FIELD_5257E,
             )
             # other than medical: string -> binary
-            dataframe = self.change_dtype(
-                col_name="P3.BGI.otherThanMedic",
+            data_dict = self.change_dtype(
+                key_name="P3.BGI.otherThanMedic",
                 dtype=bool,
                 if_nan="fill",
                 value=CanadaFillna.INDICATOR_FIELD_5257E,
             )
             # without authentication stay, work, etc: bool -> binary
-            dataframe["P3.noAuthStay"] = dataframe["P3.noAuthStay"].apply(
-                lambda x: True if x == "Y" else False
-            )
+            feature = "P3.noAuthStay"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
             # deported or refused entry: bool -> binary
-            dataframe["P3.refuseDeport"] = dataframe["P3.refuseDeport"].apply(
-                lambda x: True if x == "Y" else False
-            )
+            feature = "P3.refuseDeport"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
             # previously applied: bool -> binary
-            dataframe["P3.BGI2.PrevApply"] = dataframe["P3.BGI2.PrevApply"].apply(
-                lambda x: True if x == "Y" else False
-            )
+            feature = "P3.BGI2.PrevApply"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
             # criminal record: bool -> binary
-            dataframe["P3.PWrapper.criminalRec"] = dataframe[
-                "P3.PWrapper.criminalRec"
-            ].apply(lambda x: True if x == "Y" else False)
+            feature = "P3.PWrapper.criminalRec"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
             # military record: bool -> binary
-            dataframe["P3.PWrapper.Military.Choice"] = dataframe[
-                "P3.PWrapper.Military.Choice"
-            ].apply(lambda x: True if x == "Y" else False)
+            feature = "P3.PWrapper.Military.Choice"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
             # political, violent movement record: bool -> binary
-            dataframe["P3.PWrapper.politicViol"] = dataframe[
-                "P3.PWrapper.politicViol"
-            ].apply(lambda x: True if x == "Y" else False)
+            feature = "P3.PWrapper.politicViol"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
             # witness of ill treatment: bool -> binary
-            dataframe["P3.PWrapper.witnessIllTreat"] = dataframe[
-                "P3.PWrapper.witnessIllTreat"
-            ].apply(lambda x: True if x == "Y" else False)
+            feature = "P3.PWrapper.witnessIllTreat"
+            data_dict[feature] = True if data_dict[feature] == "Y" else False
+            return data_dict
 
-            return dataframe
-
-        if type == DocTypes.CANADA_5645E:
+        if doc_type == DocTypes.CANADA_5645E:
             # XFA to XML
             xml = canada_xfa.extract_raw_content(path)
             xml = canada_xfa.clean_xml_for_csv(xml=xml, type=DocTypes.CANADA_5645E)
@@ -603,273 +580,256 @@ class CanadaDataframePreprocessor(DataframePreprocessor):
                 VALUE_ABBREVIATION_DICT=None,
             )
 
-            # convert each data dict to a dataframe
-            dataframe = pd.DataFrame.from_dict(data=[data_dict], orient="columns")
-            self.dataframe = dataframe
+            self.data_dict = data_dict
 
-            # drop pepeg columns
-            #   warning: setting `errors='ignore` ignores errors if columns do not exist!
-            dataframe.drop(
-                CANADA_5645E_DROP_COLUMNS, axis=1, inplace=True, errors="ignore"
-            )
-
-            # transform multiple pleb columns into a single chad one and fixing column dtypes
-            # type of application: (already onehot) string -> int
-            cols = [col for col in dataframe.columns.values if "p1.Subform1" in col]
-            for c in cols:
-                dataframe = self.change_dtype(
-                    col_name=c,
-                    dtype=np.int16,
+            # drop pepeg keys
+            functional.drop(dictionary=data_dict, keys=CANADA_5645E_DROP_COLUMNS)
+            # transform multiple pleb keys into a single chad one and fixing key data types
+            # type of application: (already one hot) string -> int
+            keys = [key for key in list(data_dict.keys()) if "p1.Subform1" in key]
+            for k in keys:
+                data_dict = self.change_dtype(
+                    key_name=k,
+                    dtype=int,
                     if_nan="fill",
-                    value=np.int16(CanadaFillna.VISA_APPLICATION_TYPE_5645E),
+                    value=int(CanadaFillna.VISA_APPLICATION_TYPE_5645E),
                 )
             # drop all Accompany=No and only rely on Accompany=Yes using binary state
-            self.column_dropper(string="No", inplace=True)
+            self.key_dropper(string="No", inplace=True)
             # applicant marriage status: string to integer
-            dataframe = self.change_dtype(
-                col_name="p1.SecA.App.ChdMStatus",
-                dtype=np.int16,
+            data_dict = self.change_dtype(
+                key_name="p1.SecA.App.ChdMStatus",
+                dtype=int,
                 if_nan="fill",
-                value=np.int16(CanadaFillna.CHILD_MARRIAGE_STATUS_5645E),
+                value=int(CanadaFillna.CHILD_MARRIAGE_STATUS_5645E),
             )
             # validation date of information, i.e. current date: datetime
-            dataframe = self.change_dtype(
-                col_name="p1.SecC.SecCdate",
+            data_dict = self.change_dtype(
+                key_name="p1.SecC.SecCdate",
                 dtype=parser.parse,
                 if_nan="fill",
                 value=self.base_date,
             )
             # spouse date of birth: string -> datetime
-            dataframe = self.change_dtype(
-                col_name="p1.SecA.Sps.SpsDOB",
+            data_dict = self.change_dtype(
+                key_name="p1.SecA.Sps.SpsDOB",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["p1.SecC.SecCdate"],
+                value=data_dict["p1.SecC.SecCdate"],
             )
 
             # spouse country of birth: string -> categorical
-            dataframe = self.change_dtype(
-                col_name="p1.SecA.Sps.SpsCOB", dtype=str, if_nan="skip"
+            data_dict = self.change_dtype(
+                key_name="p1.SecA.Sps.SpsCOB", dtype=str, if_nan="skip"
             )
             # spouse occupation type (issue #2): string -> categorical
-            dataframe = self.change_dtype(
-                col_name="p1.SecA.Sps.SpsOcc",
+            data_dict = self.change_dtype(
+                key_name="p1.SecA.Sps.SpsOcc",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.OCCUPATION_5257E,
             )
             # spouse accompanying: coming=True or not_coming=False
-            dataframe["p1.SecA.Sps.SpsAccomp"] = dataframe[
-                "p1.SecA.Sps.SpsAccomp"
-            ].apply(lambda x: True if x == "1" else False)
+            feature = "p1.SecA.Sps.SpsAccomp"
+            data_dict[feature] = True if data_dict[feature] == "1" else False
             # mother date of birth: string -> datetime
-            dataframe = self.change_dtype(
-                col_name="p1.SecA.Mo.MoDOB",
+            data_dict = self.change_dtype(
+                key_name="p1.SecA.Mo.MoDOB",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["p1.SecC.SecCdate"],
+                value=data_dict["p1.SecC.SecCdate"],
             )
 
             # mother occupation type (issue #2): string -> categorical
-            dataframe = self.change_dtype(
-                col_name="p1.SecA.Mo.MoOcc",
+            data_dict = self.change_dtype(
+                key_name="p1.SecA.Mo.MoOcc",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.OCCUPATION_5257E,
             )
             # mother marriage status: int -> categorical
-            dataframe = self.change_dtype(
-                col_name="p1.SecA.Mo.ChdMStatus",
-                dtype=np.int16,
+            data_dict = self.change_dtype(
+                key_name="p1.SecA.Mo.ChdMStatus",
+                dtype=int,
                 if_nan="fill",
-                value=np.int16(CanadaFillna.CHILD_MARRIAGE_STATUS_5645E),
+                value=int(CanadaFillna.CHILD_MARRIAGE_STATUS_5645E),
             )
             # mother accompanying: coming=True or not_coming=False
-            dataframe["p1.SecA.Mo.MoAccomp"] = dataframe["p1.SecA.Mo.MoAccomp"].apply(
-                lambda x: True if x == "1" else False
-            )
+            feature = "p1.SecA.Mo.MoAccomp"
+            data_dict[feature] = True if data_dict[feature] == "1" else False
             # father date of birth: string -> datetime
-            dataframe = self.change_dtype(
-                col_name="p1.SecA.Fa.FaDOB",
+            data_dict = self.change_dtype(
+                key_name="p1.SecA.Fa.FaDOB",
                 dtype=parser.parse,
                 if_nan="fill",
-                value=dataframe["p1.SecC.SecCdate"],
+                value=data_dict["p1.SecC.SecCdate"],
             )
 
             # mother occupation type (issue #2): string -> categorical
-            dataframe = self.change_dtype(
-                col_name="p1.SecA.Fa.FaOcc",
+            data_dict = self.change_dtype(
+                key_name="p1.SecA.Fa.FaOcc",
                 dtype=str,
                 if_nan="fill",
                 value=CanadaFillna.OCCUPATION_5257E,
             )
             # father marriage status: int -> categorical
-            dataframe = self.change_dtype(
-                col_name="p1.SecA.Fa.ChdMStatus",
-                dtype=np.int16,
+            data_dict = self.change_dtype(
+                key_name="p1.SecA.Fa.ChdMStatus",
+                dtype=int,
                 if_nan="fill",
-                value=np.int16(CanadaFillna.CHILD_MARRIAGE_STATUS_5645E),
+                value=int(CanadaFillna.CHILD_MARRIAGE_STATUS_5645E),
             )
             # father accompanying: coming=True or not_coming=False
-            dataframe["p1.SecA.Fa.FaAccomp"] = dataframe["p1.SecA.Fa.FaAccomp"].apply(
-                lambda x: True if x == "1" else False
-            )
+            feature = "p1.SecA.Fa.FaAccomp"
+            data_dict[feature] = True if data_dict[feature] == "1" else False
 
             # children's status
             children_tag_list = [
-                c for c in dataframe.columns.values if "p1.SecB.Chd" in c
+                c for c in list(data_dict.keys()) if "p1.SecB.Chd" in c
             ]
             CHILDREN_MAX_FEATURES = 7
             for i in range(len(children_tag_list) // CHILDREN_MAX_FEATURES):
                 # child's marriage status 01: string to integer
-                dataframe = self.change_dtype(
-                    col_name="p1.SecB.Chd.[" + str(i) + "].ChdMStatus",
-                    dtype=np.int16,
+                data_dict = self.change_dtype(
+                    key_name="p1.SecB.Chd.[" + str(i) + "].ChdMStatus",
+                    dtype=int,
                     if_nan="fill",
-                    value=np.int16(CanadaFillna.CHILD_MARRIAGE_STATUS_5645E),
+                    value=int(CanadaFillna.CHILD_MARRIAGE_STATUS_5645E),
                 )
                 # child's relationship 01: string -> categorical
-                dataframe = self.change_dtype(
-                    col_name="p1.SecB.Chd.[" + str(i) + "].ChdRel",
+                data_dict = self.change_dtype(
+                    key_name="p1.SecB.Chd.[" + str(i) + "].ChdRel",
                     dtype=str,
                     if_nan="fill",
                     value=CanadaFillna.CHILD_RELATION_5645E,
                 )
                 # child's date of birth 01: string -> datetime
-                dataframe = self.change_dtype(
-                    col_name="p1.SecB.Chd.[" + str(i) + "].ChdDOB",
+                data_dict = self.change_dtype(
+                    key_name="p1.SecB.Chd.[" + str(i) + "].ChdDOB",
                     dtype=parser.parse,
                     if_nan="skip",
                 )
 
                 # child's country of birth 01: string -> categorical
-                dataframe = self.change_dtype(
-                    col_name="p1.SecB.Chd.[" + str(i) + "].ChdCOB",
+                data_dict = self.change_dtype(
+                    key_name="p1.SecB.Chd.[" + str(i) + "].ChdCOB",
                     dtype=str,
                     if_nan="fill",
                     value=CanadaFillna.COUNTRY_5257E,
                 )
                 # child's occupation type 01 (issue #2): string -> categorical
-                dataframe = self.change_dtype(
-                    col_name="p1.SecB.Chd.[" + str(i) + "].ChdOcc",
+                data_dict = self.change_dtype(
+                    key_name="p1.SecB.Chd.[" + str(i) + "].ChdOcc",
                     dtype=str,
                     if_nan="fill",
                     value=CanadaFillna.OCCUPATION_5257E,
                 )
                 # child's marriage status: int -> categorical
-                dataframe = self.change_dtype(
-                    col_name="p1.SecB.Chd.[" + str(i) + "].ChdMStatus",
-                    dtype=np.int16,
+                data_dict = self.change_dtype(
+                    key_name="p1.SecB.Chd.[" + str(i) + "].ChdMStatus",
+                    dtype=int,
                     if_nan="fill",
-                    value=np.int16(CanadaFillna.CHILD_MARRIAGE_STATUS_5645E),
+                    value=int(CanadaFillna.CHILD_MARRIAGE_STATUS_5645E),
                 )
                 # child's accompanying 01: coming=True or not_coming=False
-                dataframe["p1.SecB.Chd.[" + str(i) + "].ChdAccomp"] = dataframe[
-                    "p1.SecB.Chd.[" + str(i) + "].ChdAccomp"
-                ].apply(lambda x: True if x == "1" else False)
+                feature = "p1.SecB.Chd.[" + str(i) + "].ChdAccomp"
+                data_dict[feature] = True if data_dict[feature] == "1" else False
 
                 # check if the child does not exist and fill it properly (ghost case monkaS)
                 if (
                     (
-                        dataframe["p1.SecB.Chd.[" + str(i) + "].ChdMStatus"]
+                        data_dict["p1.SecB.Chd.[" + str(i) + "].ChdMStatus"]
                         == CanadaFillna.CHILD_MARRIAGE_STATUS_5645E
-                    ).all()
-                    and (
-                        dataframe["p1.SecB.Chd.[" + str(i) + "].ChdRel"] == "OTHER"
-                    ).all()
-                    and (dataframe["p1.SecB.Chd.[" + str(i) + "].ChdDOB"].isna()).all()
-                    and (
-                        dataframe["p1.SecB.Chd.[" + str(i) + "].ChdAccomp"] == False
-                    ).all()
+                    )
+                    and (data_dict["p1.SecB.Chd.[" + str(i) + "].ChdRel"] == "OTHER")
+                    and (data_dict["p1.SecB.Chd.[" + str(i) + "].ChdDOB"] is None)
+                    and (data_dict["p1.SecB.Chd.[" + str(i) + "].ChdAccomp"] == False)
                 ):
                     # ghost child's date of birth: None -> datetime (current date) -> 0 days
-                    dataframe = self.change_dtype(
-                        col_name="p1.SecB.Chd.[" + str(i) + "].ChdDOB",
+                    data_dict = self.change_dtype(
+                        key_name="p1.SecB.Chd.[" + str(i) + "].ChdDOB",
                         dtype=parser.parse,
                         if_nan="fill",
-                        value=dataframe["p1.SecC.SecCdate"],
+                        value=data_dict["p1.SecC.SecCdate"],
                     )
 
             # siblings' status
             siblings_tag_list = [
-                c for c in dataframe.columns.values if "p1.SecC.Chd" in c
+                c for c in list(data_dict.keys()) if "p1.SecC.Chd" in c
             ]
             SIBLINGS_MAX_FEATURES = 8
             for i in range(len(siblings_tag_list) // SIBLINGS_MAX_FEATURES):
                 # sibling's marriage status 01: string to integer
-                dataframe = self.change_dtype(
-                    col_name="p1.SecC.Chd.[" + str(i) + "].ChdMStatus",
-                    dtype=np.int16,
+                data_dict = self.change_dtype(
+                    key_name="p1.SecC.Chd.[" + str(i) + "].ChdMStatus",
+                    dtype=int,
                     if_nan="fill",
-                    value=np.int16(CanadaFillna.CHILD_MARRIAGE_STATUS_5645E),
+                    value=int(CanadaFillna.CHILD_MARRIAGE_STATUS_5645E),
                 )
                 # sibling's relationship 01: string -> categorical
-                dataframe = self.change_dtype(
-                    col_name="p1.SecC.Chd.[" + str(i) + "].ChdRel",
+                data_dict = self.change_dtype(
+                    key_name="p1.SecC.Chd.[" + str(i) + "].ChdRel",
                     dtype=str,
                     if_nan="fill",
                     value=CanadaFillna.CHILD_RELATION_5645E,
                 )
                 # sibling's date of birth 01: string -> datetime
-                dataframe = self.change_dtype(
-                    col_name="p1.SecC.Chd.[" + str(i) + "].ChdDOB",
+                data_dict = self.change_dtype(
+                    key_name="p1.SecC.Chd.[" + str(i) + "].ChdDOB",
                     dtype=parser.parse,
                     if_nan="skip",
                 )
 
                 # sibling's country of birth 01: string -> categorical
-                dataframe = self.change_dtype(
-                    col_name="p1.SecC.Chd.[" + str(i) + "].ChdCOB",
+                data_dict = self.change_dtype(
+                    key_name="p1.SecC.Chd.[" + str(i) + "].ChdCOB",
                     dtype=str,
                     if_nan="fill",
                     value=CanadaFillna.COUNTRY_5257E,
                 )
                 # sibling's occupation type 01 (issue #2): string -> categorical
-                dataframe = self.change_dtype(
-                    col_name="p1.SecC.Chd.[" + str(i) + "].ChdOcc",
+                data_dict = self.change_dtype(
+                    key_name="p1.SecC.Chd.[" + str(i) + "].ChdOcc",
                     dtype=str,
                     if_nan="fill",
                     value=CanadaFillna.OCCUPATION_5257E,
                 )
                 # sibling's accompanying: coming=True or not_coming=False
-                dataframe["p1.SecC.Chd.[" + str(i) + "].ChdAccomp"] = dataframe[
-                    "p1.SecC.Chd.[" + str(i) + "].ChdAccomp"
-                ].apply(lambda x: True if x == "1" else False)
+                feature = "p1.SecC.Chd.[" + str(i) + "].ChdAccomp"
+                data_dict[feature] = True if data_dict[feature] == "1" else False
 
                 # check if the sibling does not exist and fill it properly (ghost case monkaS)
                 if (
                     (
-                        dataframe["p1.SecC.Chd.[" + str(i) + "].ChdMStatus"]
+                        data_dict["p1.SecC.Chd.[" + str(i) + "].ChdMStatus"]
                         == CanadaFillna.CHILD_MARRIAGE_STATUS_5645E
-                    ).all()
-                    and (
-                        dataframe["p1.SecC.Chd.[" + str(i) + "].ChdRel"] == "OTHER"
-                    ).all()
-                    and (dataframe["p1.SecC.Chd.[" + str(i) + "].ChdOcc"].isna()).all()
-                    and (
-                        dataframe["p1.SecC.Chd.[" + str(i) + "].ChdAccomp"] == False
-                    ).all()
+                    )
+                    and (data_dict["p1.SecC.Chd.[" + str(i) + "].ChdRel"] == "OTHER")
+                    and (data_dict["p1.SecC.Chd.[" + str(i) + "].ChdOcc"] is None)
+                    and (data_dict["p1.SecC.Chd.[" + str(i) + "].ChdAccomp"] == False)
                 ):
                     # ghost sibling's date of birth: None -> datetime (current date) -> 0 days
-                    dataframe = self.change_dtype(
-                        col_name="p1.SecC.Chd.[" + str(i) + "].ChdDOB",
+                    data_dict = self.change_dtype(
+                        key_name="p1.SecC.Chd.[" + str(i) + "].ChdDOB",
                         dtype=parser.parse,
                         if_nan="fill",
-                        value=dataframe["p1.SecC.SecCdate"],
+                        value=data_dict["p1.SecC.SecCdate"],
                     )
 
-            return dataframe
+            return data_dict
 
-        if type == DocTypes.CANADA_LABEL:
-            dataframe = pd.read_csv(path, sep=" ", names=["VisaResult"])
+        if doc_type == DocTypes.CANADA_LABEL:
+            with open(path, newline="") as f:
+                data_dict = csv.DictReader(f, delimiter=" ", fieldnames=["VisaResult"])
+
             functional.change_dtype(
-                dataframe=dataframe,
-                col_name="VisaResult",
-                dtype=np.int8,
+                data_dict=data_dict,
+                key_name="VisaResult",
+                dtype=int,
                 if_nan="fill",
-                value=np.int8(CanadaFillna.VISA_RESULT),
+                value=int(CanadaFillna.VISA_RESULT),
             )
-            return dataframe
+            return data_dict
 
 
 class FileTransform:
