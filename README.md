@@ -20,7 +20,7 @@ pip install .
 
 #### 1.1.2 Using Conda Environment File
 
-We have provided a `conda_env.yml` for ease of install using `conda` (or `mamba`). Please use:
+We have provided a `conda_env.yml` (bare minimum) and `conda_env_dev.yml` (all packages including, tests, docs, and formatting) for ease of install using `conda` (or `mamba`). Please use:
 
 ```shell
 conda env create -n YOUR_ENV_NAME --file conda_env.yml
@@ -64,15 +64,13 @@ For running it, you need to map the port `8000` of the container to your desired
 docker run -p 8001:8000 cvfe
 ```
 
-*remark*: note that we do not use `mamba` in `Dockerfile` as the complexity of the environment is small and the overhead of installing `mamba` itself might not worth it. Nonetheless, *we never tested* this hypothesis and *appreciate your feedback*.
+*remark*: note that we do not use `mamba` in `Dockerfile` as the complexity of the environment is small and the overhead of installing `mamba` itself might not worth it.
 
 ### 1.2 Manual Installation
 
 Using `conda` as the package manager is not necessary nor provides any advantages (of course virtual environment are necessary). Hence, if you like, you can install dependencies via `conda`. Note that only few of the dependencies are available on `conda` channels and you still need to use `pip`.
 
-From now on, the phrase "*if conda*" assumes if you are using `conda` for your packages. Otherwise, `pip` only is inferred.
-
-**tip:** You can use `mamba` to hugely speed up the installation process. If you don't want to, replace all instances of the `mamba` with `conda` in following steps.
+**tip:** You can use `mamba` to hugely speed up the installation process.
 
 #### \[Optional\] 1.2.1 Create a `conda` env
 
@@ -99,38 +97,13 @@ You should have at least `pip >= 23.1.2`
 pip install --upgrade pip
 ```
 
-#### \[Optional\] 1.2.4 Pin the Python version
-
-When using `conda`, `mamba` and so on, it might update the Python to its latest version. We should prevent that by pinning the Python version in the `conda` environment. To do so:
-
-if conda:
-
-```shell
-echo "python 3.11.0" >>$CONDA_PREFIX/conda-meta/pinned
-```
-
-#### 1.2.5 Install Processing Dependencies
-
-We need `pandas` and `numpy` and some others, but installing `pandas` will install all those needed.
-
-```shell
-pip install pandas
-```
-
-if conda:
-
-```shell
-mamba install pandas
-```
-
 #### 1.2.5 Install data extraction dependencies
 
 ```shell
 pip install xmltodict>=0.13.0
-# if conda:
-mamba install -c conda-forge xmltodict>=0.13.0 -y
 pip install pikepdf>=5.1.5
-pip install pypdf2>=2.2.1
+pip install pypdf>=3.17.0
+pip install python-dateutil>=2.8.1
 ```
 
 #### 1.2.6 Install API libs
@@ -138,11 +111,11 @@ pip install pypdf2>=2.2.1
 These libraries (the main one is FastAPI) are not for the ML part and only are here to provide the API and web services.
 
 ```shell
-pip install pydantic>=1.9.1
-pip install fastapi>=0.85.0
-pip install gunicorn>=20.1.0
-pip install uvicorn>=0.18.2
-pip install python-multipart>=0.0.5
+pip install pydantic>=2.0.3
+pip install fastapi>=0.100.0
+pip install gunicorn>=21.2.0
+pip install uvicorn>=0.23.1
+pip install python-multipart>=0.0.6
 ```
 
 *\[Optional\]* For making it online (only for development) using `ngrok`:
