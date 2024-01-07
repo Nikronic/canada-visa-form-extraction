@@ -25,6 +25,15 @@ dependencies = [
     "pikepdf>=8.2.1",
     "pypdf>=3.17.0",
     "python-dateutil>=2.8.1",
+]
+
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = { file = "VERSION" }
+
+[project.optional-dependencies]
+api = [
     "pydantic>=2.0.3",
     "fastapi>=0.100.0",
     "gunicorn>=21.2.0",
@@ -34,13 +43,6 @@ dependencies = [
     "pyngrok>=6.0.0",
     "requests>=2.31.0",
 ]
-
-dynamic = ["version"]
-
-[tool.setuptools.dynamic]
-version = {file = "VERSION"}
-
-[project.optional-dependencies]
 format = ["pre-commit>=3.6.0"]
 test = ["httpx>=0.24.1", "pytest>=7.4.0"]
 doc = [
@@ -48,7 +50,7 @@ doc = [
     "sphinx-copybutton>=0.5.2",
     "sphinx-autodoc-typehints>=1.24.0",
     "myst-parser>=2.0.0",
-    "furo>=2023.8.19"
+    "furo>=2023.8.19",
 ]
 
 [tool.setuptools]
