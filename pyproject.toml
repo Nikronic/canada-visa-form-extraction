@@ -56,7 +56,7 @@ doc = [
 [tool.setuptools]
 include-package-data = true
 [tool.setuptools.packages.find]
-where = ["cvfe"]
+where = ["src"]
 [tool.setuptools.package-data]
 mypkg = ["*.csv"]
 [tool.black]
