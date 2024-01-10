@@ -379,7 +379,7 @@ class CanadaDataDictPreprocessor(DataDictPreprocessor):
             # expiry remaining period: datetime -> int days
             # if None, fill with 1 year ago, ie. period=1year
             feature = "P3.Sign.C1CertificateIssueDate"
-            temp_date = data_dict[feature] + relativedelta(years=-1)
+            temp_date = parser.parse(data_dict[feature]) + relativedelta(years=-1)
             data_dict = self.change_dtype(
                 key_name="P2.MS.SecA.Psprt.ExpiryDate",
                 dtype=parser.parse,

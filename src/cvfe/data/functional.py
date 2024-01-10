@@ -495,7 +495,7 @@ def change_dtype(
             Any: ``x`` that is casted to a new type
         """
         if dtype == parser.parse:
-            return dtype(x, default=default_datetime)
+            return dtype(x, default=default_datetime).isoformat()
         return dtype(x)
 
     # apply the rules and data type change
