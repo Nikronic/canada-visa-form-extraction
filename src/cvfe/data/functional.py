@@ -431,7 +431,9 @@ def change_dtype(
         month=DATEUTIL_DEFAULT_DATETIME["month"],
         day=DATEUTIL_DEFAULT_DATETIME["day"],
     )
-    default_datetime = kwargs.get("default_datetime", default_datetime)
+    default_datetime = cast(
+        datetime.datetime, kwargs.get("default_datetime", default_datetime)
+    )
     default_datetime = default_datetime.isoformat()
 
     # define `func` for different cases of predefined logics
@@ -469,7 +471,7 @@ def change_dtype(
         """
         if dtype == parser.parse:  # datetime parser
             try:
-                parser.parse(value).isoformat()
+                parser.parse(value)
             except ValueError:  # bad input format for `parser.parse`
                 value = cast(str, value)
                 # we want YYYY-MM-DD
@@ -496,7 +498,7 @@ def change_dtype(
             Any: ``x`` that is casted to a new type
         """
         if dtype == parser.parse:
-            return dtype(x, default=default_datetime)
+            return dtype(x, default=default_datetime).isoformat()
         return dtype(x)
 
     # apply the rules and data type change
