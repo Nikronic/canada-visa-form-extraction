@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -50,8 +51,9 @@ def test_good_files():
 
     response = test_client.post(url="/cvfe/v1/convert/adobe_xfa/", files=files)
 
-    print(response.content)
     assert response.status_code == status.HTTP_200_OK
 
-    correct_response = open("tests/assets/filled/response_fake_correct.json", "rb")
+    correct_response: dict[str, dict[str, Any]] = open(
+        "tests/assets/filled/response_fake_correct.json", "rb"
+    )
     assert response.json() == json.load(correct_response)
