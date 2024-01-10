@@ -1,9 +1,14 @@
 import argparse
 import logging
 
-import fastapi
-import uvicorn
-from fastapi.middleware.cors import CORSMiddleware
+try:
+    import fastapi
+    import uvicorn
+    from fastapi.middleware.cors import CORSMiddleware
+except ImportError as ie:
+    from cvfe.utils.import_utils import optional_component_not_installed
+
+    optional_component_not_installed(__name__, "api", ie)
 
 from cvfe.api import apps as api_apps
 from cvfe.api import models as api_models
