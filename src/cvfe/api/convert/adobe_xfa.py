@@ -53,7 +53,7 @@ async def convert(
         data_dict: dict[str, Any] = process(src_dir=BASE_SOURCE_DIR)
 
         logger.info("Process finished")
-        response = [data_dict]
+        response = data_dict
 
     except Exception as error:
         logger.exception(error)

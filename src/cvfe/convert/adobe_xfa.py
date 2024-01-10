@@ -16,7 +16,7 @@ from cvfe.data.preprocessor import (
 logger = logging.getLogger(__name__)
 
 
-def process(src_dir: Path | str) -> dict[str, Any]:
+def process(src_dir: Path | str) -> dict[str, dict[str, Any]]:
     """Converts a directory of 5257E and 5645E Canada visa forms to python dict
 
     Note:
@@ -76,7 +76,7 @@ def process(src_dir: Path | str) -> dict[str, Any]:
     logger.info("↓↓↓ Starting data loading ↓↓↓")
     # convert PDFs to dictionaries
     src_dir = dst_dir.as_posix()
-    data_dict: dict[str, Any] = {}
+    form_data_dict: dict[str, dict[str, Any]] = {}
     for dirpath, dirnames, all_filenames in os.walk(src_dir):
         # filter all_filenames
         filenames = all_filenames
@@ -103,9 +103,9 @@ def process(src_dir: Path | str) -> dict[str, Any]:
             logger.info("↑↑↑ Finished processing 5645E ↑↑↑")
 
             # final dictionary: concatenate 5257 and 5645 dicts
-            data_dict.update(data_dict_applicant)
-            data_dict.update(data_dict_family)
+            form_data_dict[DocTypes.CANADA_5257E.name] = data_dict_applicant
+            form_data_dict[DocTypes.CANADA_5645E.name] = data_dict_family
         # logging
         logger.info(f"Processed the data point")
     logger.info("↑↑↑ Finished data loading ↑↑↑")
-    return data_dict
+    return form_data_dict
