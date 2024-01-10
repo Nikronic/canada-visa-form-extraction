@@ -163,3 +163,6 @@ cython_debug/
 sample/
 # ignore `temp` dir of API
 temp/
+
+# test generated files for decrypted pdfs
+tests/assets/decrypted
