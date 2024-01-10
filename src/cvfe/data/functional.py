@@ -432,6 +432,7 @@ def change_dtype(
         day=DATEUTIL_DEFAULT_DATETIME["day"],
     )
     default_datetime = kwargs.get("default_datetime", default_datetime)
+    default_datetime = default_datetime.isoformat()
 
     # define `func` for different cases of predefined logics
     if isinstance(if_nan, str):  # predefined `if_nan` cases
