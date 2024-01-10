@@ -468,7 +468,7 @@ def change_dtype(
         """
         if dtype == parser.parse:  # datetime parser
             try:
-                parser.parse(value)
+                parser.parse(value).isoformat()
             except ValueError:  # bad input format for `parser.parse`
                 value = cast(str, value)
                 # we want YYYY-MM-DD
