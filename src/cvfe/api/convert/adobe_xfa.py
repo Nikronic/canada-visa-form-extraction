@@ -3,15 +3,22 @@ import sys
 from pathlib import Path
 from typing import Any, Optional
 
-import fastapi
-import requests
-from fastapi.encoders import jsonable_encoder
-
 from cvfe.api.convert import BASE_SOURCE_DIR
 from cvfe.convert.adobe_xfa import process
 
 # config logger
 logger = logging.getLogger(__name__)
+
+# check if dependencies are installed
+try:
+    import fastapi
+    import requests
+    from fastapi.encoders import jsonable_encoder
+
+except ImportError as ie:
+    from cvfe.utils.import_utils import optional_component_not_installed
+
+    optional_component_not_installed(__name__, "api", ie)
 
 
 # FastAPI router to be used by the FastAPI app
@@ -39,7 +46,8 @@ async def convert(
         logger.exception(error)
         e = sys.exc_info()[1]
         raise fastapi.HTTPException(
-            status_code=fastapi.status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=str(e)
+            status_code=fastapi.status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=str(e),
         )
     try:
         data_dict: dict[str, Any] = process(src_dir=BASE_SOURCE_DIR)

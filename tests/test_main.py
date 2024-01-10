@@ -1,6 +1,15 @@
 import json
 from pathlib import Path
 
+import pytest
+
+# if API deps are not installed, ignore running tests
+pytest.importorskip(
+    modname="fastapi",
+    reason=f"API dependencies are not installed. "
+    f"Ignoring all API tests and marking it as 'no-error'",
+)
+
 from fastapi import status
 from starlette.testclient import TestClient
 
