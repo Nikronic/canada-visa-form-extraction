@@ -55,7 +55,7 @@ def process(src_dir: Path | str) -> dict[str, Any]:
         src_dir = Path(src_dir)
 
     # path to the output decrypted pdf
-    dst_dir: Path = src_dir.parts[0] / Path("decrypted/")
+    dst_dir: Path = src_dir.parent / Path("decrypted/")
     # main code
     logger.info("↓↓↓ Starting data extraction ↓↓↓")
     # Canada protected PDF to make machine readable and skip other files
